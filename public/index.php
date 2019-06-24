@@ -29,10 +29,25 @@ route('GET', '^/upload/file/(?<filename>.+)$', function ($params) {
     exit($st);
 });
 
-route("GET", '^/api/data/(?<type>.+)/(?<date>.+)$', function($params) {
+route("GET", '^/api/data/(?<obs>.+)/(?<date>.+)/(?<type>.+)$', function($params) {
     //echo $GLOBALS["DATABANK_PATH"];
     
-    $file = new File("dd");
+    $file = new File($params["obs"], $params["type"], $params["date"]);
+    
+    header(http_response_code(200));
+    // header("Content-Type: application/json; charset=UTF-8");
+    // header("Content-Encoding:gzip");
+    
+    $fh = fopen('php://output', 'w');
+    fputs($fh, '[');
+    foreach($file->read() as $line) {
+        fputs($fh, json_encode($line).',');
+    }
+     // FIXME: find a way not to send an empty JSONObject, because of the trailing comma
+     // WORKAROUND: Remove the last object in the array client side
+    fputs($fh,'{}]');
+    $st = ob_get_clean();
+    exit($st);
 });
 
 header('HTTP/1.0 404 Not Found');

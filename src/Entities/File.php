@@ -45,19 +45,22 @@ class File
      */
     public $day;
 
-    function __construct($filename)
+    function __construct($obs, $type, $posix)
     {
-        $this->name = $filename;
-        $this->day = false;
-        $this->decodeFilename($filename);
+        $this->obs = $obs;
+        $this->type = $type;
+        $this->date = DateTime::createFromFormat("YmdHis",date("YmdHis", $posix), new DateTimeZone("UTC"));
+        // $this->name = $filename;
+        // $this->day = false;
+        // $this->decodeFilename($filename);
+    }
+
+    public function getFilepath() {
+        return $GLOBALS["DATABANK_PATH"].self::DATABANK_MAGSTORE_ROOT."/".$this->obs."/".$this->date->format("Y")."/".$this->type."/".$this->obs.$this->date->format("Ymd")."-".$this->type.".csv";
     }
 
     public function read() {
-        if($this->day == false) {
-            $link  = $GLOBALS["DATABANK_PATH"].self::DATABANK_UPLINK_ROOT."/".$this->obs."/".$this->date->format("Y")."/".$this->date->format("m")."/".$this->date->format("d")."/".$this->name;
-        } else {
-            $link  = $GLOBALS["DATABANK_PATH"].self::DATABANK_MAGSTORE_ROOT."/".$this->obs."/".$this->date->format("Y")."/".$this->type."/".$this->name;
-        }
+        $link = $this->getFilepath();
         if(file_exists($link)) {
             $fp = fopen($link, "rb");
             fgets($fp); // Ignore firstline
