@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__.'/../config.php';
 require_once __DIR__.'/../src/functions.php';
 require_once __DIR__.'/../src/Entities/File.php';
 
@@ -26,6 +27,12 @@ route('GET', '^/upload/file/(?<filename>.+)$', function ($params) {
     fputs($fh,'{}]');
     $st = ob_get_clean();
     exit($st);
+});
+
+route("GET", '^/api/data/(?<type>.+)/(?<date>.+)$', function($params) {
+    //echo $GLOBALS["DATABANK_PATH"];
+    
+    $file = new File("dd");
 });
 
 header('HTTP/1.0 404 Not Found');

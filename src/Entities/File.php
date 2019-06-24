@@ -5,8 +5,8 @@ class File
     const TYPE_ENV = "env";
     const TYPE_LOG = "log";
 
-    const DATABANK_UPLINK_ROOT = __DIR__."/../../Databank/uplink";
-    const DATABANK_MAGSTORE_ROOT = __DIR__."/../../Databank/magstore";
+    const DATABANK_UPLINK_ROOT = "/upstore";
+    const DATABANK_MAGSTORE_ROOT ="/magstore";
 
     /**
      * The name of the file
@@ -54,9 +54,9 @@ class File
 
     public function read() {
         if($this->day == false) {
-            $link  = self::DATABANK_UPLINK_ROOT."/".$this->obs."/".$this->date->format("Y")."/".$this->date->format("m")."/".$this->date->format("d")."/".$this->name;
+            $link  = $GLOBALS["DATABANK_PATH"].self::DATABANK_UPLINK_ROOT."/".$this->obs."/".$this->date->format("Y")."/".$this->date->format("m")."/".$this->date->format("d")."/".$this->name;
         } else {
-            $link  = self::DATABANK_MAGSTORE_ROOT."/".$this->obs."/".$this->date->format("Y")."/".$this->type."/".$this->name;
+            $link  = $GLOBALS["DATABANK_PATH"].self::DATABANK_MAGSTORE_ROOT."/".$this->obs."/".$this->date->format("Y")."/".$this->type."/".$this->name;
         }
         if(file_exists($link)) {
             $fp = fopen($link, "rb");
