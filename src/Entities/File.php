@@ -50,22 +50,21 @@ class File
         $this->obs = $obs;
         $this->type = $type;
         $this->date = DateTime::createFromFormat("YmdHis",date("YmdHis", $posix), new DateTimeZone("UTC"));
-        // $this->name = $filename;
-        // $this->day = false;
-        // $this->decodeFilename($filename);
     }
 
     public function getFilepath() {
-        return $GLOBALS["DATABANK_PATH"].self::DATABANK_MAGSTORE_ROOT."/".$this->obs."/".$this->date->format("Y")."/".$this->type."/".$this->obs.$this->date->format("Ymd")."-".$this->type.".csv";
+        return $GLOBALS["DATABANK_PATH"].self::DATABANK_MAGSTORE_ROOT.DIRECTORY_SEPARATOR.$this->obs.DIRECTORY_SEPARATOR.
+            $this->date->format("Y").DIRECTORY_SEPARATOR.$this->type.DIRECTORY_SEPARATOR.$this->obs.$this->date->format("Ymd")."-".$this->type.".csv";
     }
 
     public function read() {
         $link = $this->getFilepath();
         if(file_exists($link)) {
             $fp = fopen($link, "rb");
-            fgets($fp); // Ignore firstline
+            $i = 0;
             while(($line = fgets($fp)) != false) {
-                yield $this->parseLine($line);
+                if($i == 0) { yield trim($line); $i++; }
+                else yield $this->parseLine($line);
             }
             fclose($fp);
         } else yield "File not found: ".$link;
@@ -73,82 +72,37 @@ class File
 
     public function parseLine($line) {
         $r = explode(",", trim($line));
-        return array(
-          "posix" => $r[0],
-          "x" => $r[2],
-          "y" => $r[3],
-          "z" => $r[4],
-          "f" => $r[5] 
-        );
-    }
-
-    public function decodeFilename(string $filename)
-    {
-        $parts = explode('.', $filename);
-        // TODO: Ajouter les fichers de mesures absolues
-        /* // ABS
-        if (2 === count($parts)) {
-            if ('txt' === $parts[1]) {
-                if (null !== $extract = $this->extractCodeAndDate($parts[0], 'Ymd', 8)) {
-                    $type = self::TYPE_ABS;
-                    list($code, $date) = $extract;
-
-                    return new File($code, $date, $type);
-                }
-            }
+        if($this->type == self::TYPE_RAW) {
+            return array(
+              "posix" => $r[0],
+              "x" => $r[2],
+              "y" => $r[3],
+              "z" => $r[4],
+              "f" => $r[5] 
+            );
+        } else if ($this->type == self::TYPE_ENV) {
+            return array(
+                "t" => $r[0],
+                "ms" => $r[1],
+                "Ts" => $r[2],
+                "Te" => $r[3],
+                "Ibat1" => $r[4],
+                "Vbat1" => $r[5],
+                "Ibat2" => $r[6],
+                "Vbat2" => $r[7],
+                "Iused" => $r[8],
+                "Vused" => $r[9],
+                "Tbat" => $r[10],
+                "Lighting" => $r[11],
+              );
+        } else if ($this->type == self::TYPE_LOG) {
+            return array(
+                "t" => $r[0],
+                "ms" => $r[1],
+                "Source" => $r[2],
+                "Level" => $r[3],
+                "Message" => $r[4],
+              );
         }
-        */
-
-        // Fixed old format with dashes against dots
-        // Old format : CLF120170123070000.raw.csv
-        // New format : CLF120170123070000-raw.csv
-        if (3 !== count($parts)) {
-            // $parts = explode('-', $parts[0]);
-            $patern = ["CLF1", "YYYYMMddhhmmss", ".raw.csv"];
-            $error = array("Error" => $filename." does not match patern ".join("", $patern));
-            echo json_encode($error);
-            exit();
-        }
-
-        if (null === $extract = $this->extractCodeAndDate($parts[0])) {
-            if (null === $extract = $this->extractCodeAndDate($parts[0], false)) {
-                return null;
-            }
-        }
-        $this->type = mb_strtolower($parts[1]);
-        $this->obs = $extract[0];
-        $this->date = $extract[1];
-    }
-
-    /**
-     * Extract code and date (without knowing the code length)
-     *
-     * @param string $string      String
-     * @param bool   $includeTime Include time
-     *
-     * @return null|array
-     */
-    private function extractCodeAndDate(string $string, bool $includeTime = true)
-    {
-        $dateFormat = $includeTime ? 'YmdHis' : 'Ymd';
-        $dateLength = $includeTime ? 14 : 8;
-
-        // example : CLF120170118
-        if (mb_strlen($string) > $dateLength) {
-            $code = mb_strtoupper(mb_strcut($string, 0, -$dateLength));
-            $date = mb_strcut($string, -$dateLength);
-            if ($code) {
-                if (false !== $date = DateTime::createFromFormat($dateFormat, $date)) {
-                    if (!$includeTime) {
-                        $this->day = true;
-                        $date->setTime(0, 0, 0, 0);
-                    }
-
-                    return [$code, $date];
-                }
-            }
-        }
-
-        return null;
     }
 }
