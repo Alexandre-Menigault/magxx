@@ -74,11 +74,12 @@ class File
         $r = explode(",", trim($line));
         if($this->type == self::TYPE_RAW) {
             return array(
-              "posix" => $r[0],
-              "x" => $r[2],
-              "y" => $r[3],
-              "z" => $r[4],
-              "f" => $r[5] 
+              "t" => $r[0],
+              "ms" => $r[1],
+              "X" => $r[2],
+              "Y" => $r[3],
+              "Z" => $r[4],
+              "F" => $r[5] 
             );
         } else if ($this->type == self::TYPE_ENV) {
             return array(
