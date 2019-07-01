@@ -5,6 +5,9 @@ class File
     const TYPE_ENV = "env";
     const TYPE_LOG = "log";
 
+    const INTERVAL_DAY = "1d";
+    const INTERVAL_2HOURS = "2h";
+
     const DATABANK_UPLINK_ROOT = "/upstore";
     const DATABANK_MAGSTORE_ROOT = "/magstore";
 
@@ -21,6 +24,13 @@ class File
      * @var \DateTime
      */
     public $date;
+
+    /**
+     * The date interval data to get between
+     *
+     * @var \DateTime
+     */
+    public $intervalDate;
 
     /**
      * The codename of the observatory
@@ -45,11 +55,16 @@ class File
      */
     public $day;
 
-    function __construct($obs, $type, $posix)
+    function __construct($obs, $type, $posix, $interval = self::INTERVAL_DAY)
     {
         $this->obs = $obs;
         $this->type = $type;
         $this->date = DateTime::createFromFormat("YmdHis", date("YmdHis", $posix), new DateTimeZone("UTC"));
+        $this->intervalDate = clone $this->date;
+        if ($interval == self::INTERVAL_DAY)
+            $this->intervalDate->add(new DateInterval("P1D"));
+        else if ($interval == self::INTERVAL_2HOURS)
+            $this->intervalDate->add(new DateInterval("PT2H"));
     }
 
     public function getFilepath()
@@ -64,17 +79,35 @@ class File
         if (file_exists($link)) {
             $fp = fopen($link, "rb");
             $i = 0;
-            while (($line = fgets($fp)) != false) {
+            $end = false;
+            while (!$end && ($line = fgets($fp)) != false) {
                 if ($i == 0) {
-                    if ($this->type == self::TYPE_RAW) $line=trim($line) . ",Fv-Fs";
+                    if ($this->type == self::TYPE_RAW) $line = trim($line) . ",Fv-Fs";
                     yield trim($line);
                     $i++;
                 } else {
-                    yield $this->parseLine($line);
+                    $parsed = $this->parseLine($line);
+                    $isBetweenInterval = $this->isLineBetweenInterval($parsed);
+                    if ($isBetweenInterval == 1) {
+                        $end = true;
+                    } else if ($isBetweenInterval == 0)
+                        yield $parsed;
                 }
             }
             fclose($fp);
         } else yield "File not found: " . $link;
+    }
+
+    private function isLineBetweenInterval($line)
+    {
+        $d = DateTime::createFromFormat("YmdHis", date("YmdHis", $line["t"]), new DateTimeZone("UTC"));
+        $offset = (new DateTime())->getTimezone()->getOffset($d);
+        $d->sub(new DateInterval("PT" . $offset . "S"));
+        if ($this->intervalDate->getTimestamp() < $d->getTimestamp()) return 1;
+        else if ($this->date->getTimestamp() <= $d->getTimestamp() && $this->intervalDate->getTimestamp() >= $d->getTimestamp())
+            return 0;
+        return -1;
+        // return ($this->date->getTimestamp() <= $d->getTimestamp() && $this->intervalDate->getTimestamp() >= $d->getTimestamp());
     }
 
     public function parseLine($line)

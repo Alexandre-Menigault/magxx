@@ -6,7 +6,8 @@ require_once __DIR__ . '/../src/Entities/File.php';
 route('GET', '^/$', function () { });
 
 route("GET", '^/api/data/(?<obs>.+)/(?<date>.+)/(?<type>.+)$', function ($params) {
-    $file = new File($params["obs"], $params["type"], $params["date"]);
+    $interval = isset($_GET["interval"]) ? $_GET["interval"] : "1d";
+    $file = new File($params["obs"], $params["type"], $params["date"], $interval);
 
     @ini_set('zlib.output_compression', 0);
     header(http_response_code(200));
@@ -18,7 +19,7 @@ route("GET", '^/api/data/(?<obs>.+)/(?<date>.+)/(?<type>.+)$', function ($params
     foreach ($file->read() as $line) {
         if ($i == 0) {
             $line = array("header" => explode(",", $line), "type" => $file->type, "date" => $file->date);
-            if($file->type == $file::TYPE_RAW ) $line["colors"] = ["#080", "#008b8b", "#ff8c00", "#9400d3", "#000"];
+            if ($file->type == $file::TYPE_RAW) $line["colors"] = ["#080", "#008b8b", "#ff8c00", "#9400d3", "#000"];
             $i++;
         }
         fputs($fh, json_encode($line) . ',');
