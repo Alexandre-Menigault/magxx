@@ -28,6 +28,7 @@ while ($date < $end_date) {
     // On crée un fichier vide du jour
     $filename_day = "CLF3" . $Y . $m . $d . "-raw.csv";
     $end_dir =  $GLOBALS["DATABANK_PATH"] . "/magstore/CLF3/" . $Y . "/raw/";
+    if (!file_exists($end_dir)) mkdir($end_dir, 0777, true);
     $end_file = fopen($end_dir . $filename_day, "w");
     fwrite($end_file, implode(",", $raw_headers) . PHP_EOL);
 

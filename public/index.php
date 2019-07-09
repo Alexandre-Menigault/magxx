@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../src/functions.php';
 require_once __DIR__ . '/../src/Entities/File.php';
+require_once __DIR__ . '/../src/Upload.php';
 
 route('GET', '^/$', function () { });
 
@@ -29,6 +30,17 @@ route("GET", '^/api/data/(?<obs>.+)/(?<date>.+)/(?<type>.+)$', function ($params
     fputs($fh, '{}]');
     $st = ob_get_clean();
     exit($st);
+});
+
+route(['GET', 'POST'], "^/api/upload-csv$", function ($params) {
+    $res = Upload::uploader();
+    $log = fopen("log.txt", "w");
+    fwrite($log, print_r($_FILES, true));
+    fwrite($log, print_r($res, true));
+    fclose($log);
+
+    header(http_response_code(200));
+    echo json_encode($res);
 });
 
 header('HTTP/1.0 404 Not Found');

@@ -8,8 +8,8 @@ class File
     const INTERVAL_DAY = "1d";
     const INTERVAL_2HOURS = "2h";
 
-    const DATABANK_UPLINK_ROOT = "/upstore";
-    const DATABANK_MAGSTORE_ROOT = "/magstore";
+    const DATABANK_UPLINK_ROOT = DIRECTORY_SEPARATOR . "upstore";
+    const DATABANK_MAGSTORE_ROOT = DIRECTORY_SEPARATOR . "magstore";
 
     /**
      * The name of the file
@@ -67,10 +67,12 @@ class File
             $this->intervalDate->add(new DateInterval("PT2H"));
     }
 
-    public function getFilepath()
+    public function getFilepath($upload = false)
     {
-        return $GLOBALS["DATABANK_PATH"] . self::DATABANK_MAGSTORE_ROOT . DIRECTORY_SEPARATOR . $this->obs . DIRECTORY_SEPARATOR .
-            $this->date->format("Y") . DIRECTORY_SEPARATOR . $this->type . DIRECTORY_SEPARATOR . $this->obs . $this->date->format("Ymd") . "-" . $this->type . ".csv";
+        return $GLOBALS["DATABANK_PATH"] . ($upload == false ? self::DATABANK_MAGSTORE_ROOT : self::DATABANK_UPLINK_ROOT) .
+            DIRECTORY_SEPARATOR . $this->obs . DIRECTORY_SEPARATOR . ($upload == false ? $this->date->format("Y") : ($this->date->format("Y") . DIRECTORY_SEPARATOR . $this->date->format("m") . DIRECTORY_SEPARATOR . $this->date->format("d"))) . DIRECTORY_SEPARATOR .
+            $this->type . DIRECTORY_SEPARATOR .
+            $this->obs . ($upload == false ? $this->date->format("Ymd") : $this->date->format("YmdHis")) . ($upload == false ? "-" : ".") . $this->type . ".csv";
     }
 
     public function read()
