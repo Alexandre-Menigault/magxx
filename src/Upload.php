@@ -40,23 +40,29 @@ class Upload
                         "imported" => $imported
                     );
                 } else {
+
+                    header(http_response_code(409));
                     $return[$fileId] = array(
                         "saved" => false,
                     );
                 }
             } catch (Error $e) {
                 $error = new Error("Cannot parse filename " . $filename);
-                $errJson = json_encode(array(
+                $errJson = array(
                     "message" => $error->getMessage(),
                     "trace" => $error->getTrace(),
-                ));
-                error_log($errJson);
+                );
+                error_log(json_encode($errJson));
+
+                header(http_response_code(400));
                 $return[$fileId] = array(
                     "saved" => false,
                     "error" => $errJson
                 );
             }
         }
+
+        header(http_response_code(200));
         return $return;
     }
 

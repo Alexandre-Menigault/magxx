@@ -39,7 +39,6 @@ route(['GET', 'POST'], "^/api/upload-csv$", function ($params) {
     fwrite($log, print_r($res, true));
     fclose($log);
 
-    header(http_response_code(200));
     echo json_encode($res);
 });
 
