@@ -4,3 +4,5 @@ todo
 \.vscode/
 
 public/log\.txt
+
+phpDocumentor\.phar
