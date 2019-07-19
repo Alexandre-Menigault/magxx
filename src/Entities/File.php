@@ -143,7 +143,7 @@ class File
                 "Iused" => $r[8],
                 "Vused" => $r[9],
                 "Tbat" => $r[10],
-                "Lighting" => $r[11],
+                "Lightning" => $r[11],
             );
         } else if ($this->type == self::TYPE_LOG) {
             return array(
@@ -151,7 +151,7 @@ class File
                 "ms" => $r[1],
                 "Source" => $r[2],
                 "Level" => $r[3],
-                "Message" => $r[4],
+                "Message" => join(",", array_slice($r, 4)),
             );
         }
     }
