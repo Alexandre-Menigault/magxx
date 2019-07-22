@@ -7,9 +7,11 @@ $time_start = microtime(true);
 
 $raw_headers = ["t", "ms", "X", "Y", "Z", "F"];
 
+$interval = isset($_GET["days"]) ? $_GET["days"] : "1";
+
 $date = new DateTime();
 $date->setTime(0, 0, 0, 0);
-$date->sub(new DateInterval('P1D'));
+$date->sub(new DateInterval('P' . $interval . 'D'));
 
 $end_date = new DateTime();
 $end_date->setTime(0, 0, 0, 0);
