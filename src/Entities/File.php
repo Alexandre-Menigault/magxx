@@ -1,4 +1,7 @@
 <?php
+
+include_once __DIR__ . "/../exceptions/FileNotFoundException.php";
+
 class File
 {
     const TYPE_RAW = "raw";
@@ -65,6 +68,11 @@ class File
             $this->intervalDate->add(new DateInterval("P1D"));
         else if ($interval == self::INTERVAL_2HOURS)
             $this->intervalDate->add(new DateInterval("PT2H"));
+
+        $filepath = $this->getFilepath();
+        if (!is_file($filepath)) {
+            throw new FileNotFoundException($filepath);
+        }
     }
 
     public function getFilepath($upload = false)
