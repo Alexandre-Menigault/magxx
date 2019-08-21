@@ -8,6 +8,9 @@ $time_start = microtime(true);
 $raw_headers = ["t", "ms", "X", "Y", "Z", "F"];
 
 $interval = isset($_GET["days"]) ? $_GET["days"] : "1";
+$obs = isset($_GET["obs"]) ? $_GET["obs"] : "CLF3";
+
+echo $obs, PHP_EOL;
 
 $date = new DateTime();
 $date->setTime(0, 0, 0, 0);
@@ -29,13 +32,13 @@ while ($date < $end_date) {
     $m = $date->format("m");
     $d = $date->format("d");
     foreach ($types as $type) {
-        $directory = Path::join($GLOBALS["DATABANK_PATH"], '/upstore/CLF3', $Y, $m, $d, $type);
+        $directory = Path::join($GLOBALS["DATABANK_PATH"], '/upstore', $obs, $Y, $m, $d, $type);
         $files = array_filter(scandir($directory), function ($item) {
             return $item[0] !== '.'; // Retire les dossiers '.', '..' et les fichers/dossiers cachés
         });
         // On crée un fichier vide du jour
-        $filename_day = "CLF3" . $Y . $m . $d . "-" . $type . ".csv";
-        $end_dir =  Path::join($GLOBALS["DATABANK_PATH"], "/magstore/CLF3/", $Y, $type);
+        $filename_day = $obs . $Y . $m . $d . "-" . $type . ".csv";
+        $end_dir =  Path::join($GLOBALS["DATABANK_PATH"], "/magstore", $obs, $Y, $type);
         if (!file_exists($end_dir)) mkdir($end_dir, 0777, true);
 
         if ($type != "raw") {
@@ -63,7 +66,7 @@ while ($date < $end_date) {
 $time_end = microtime(true);
 $time = $time_end - $time_start;
 
-echo "Parsed " . $nb_files . " files of " . $day_count . " days in " . $time * 1000 . "ms<br/>";
+echo "Parsed " . $nb_files . " files of " . $day_count . " days in " . $time * 1000 . "ms" . PHP_EOL;
 
 
 
