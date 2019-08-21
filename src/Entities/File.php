@@ -92,7 +92,7 @@ class File
             $end = false;
             while (!$end && ($line = fgets($fp)) != false) {
                 if ($i == 0) {
-                    if ($this->type == self::TYPE_RAW) $line = trim($line) . ",Fv-Fs";
+                    if ($this->type == self::TYPE_RAW) $line = trim($line) . ",Fs-Fv";
                     yield trim($line);
                     $i++;
                 } else {
@@ -136,7 +136,7 @@ class File
                 "Y" => $r[3],
                 "Z" => $r[4],
                 "F" => $r[5],
-                "Fv-Fs" => "" . $Fv - $F . "",
+                "Fs-Fv" => "" . $F - $Fv . "",
             );
         } else if ($this->type == self::TYPE_ENV) {
             return array(
