@@ -3,6 +3,7 @@ require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../src/functions.php';
 require_once __DIR__ . '/../src/Entities/File.php';
 require_once __DIR__ . '/../src/Upload.php';
+require_once __DIR__ . '/../src/Entities/Observatory.php';
 require_once __DIR__ . '/../src/exceptions/FileNotFoundException.php';
 
 route('GET', '^/$', function () { });
@@ -46,6 +47,19 @@ route(['GET', 'POST'], "^/api/upload-csv$", function ($params) {
     fclose($log);
 
     echo json_encode($res);
+});
+// Routes for Observatories
+route(['GET',], "^/api/observatories/?$", function ($params) {
+    $obs = Observatory::ListAllObs();
+
+    header("Content-Type: application/json");
+    echo json_encode($obs);
+});
+route(['GET',], "^/api/observatory/(?<obs>.+)$", function ($params) {
+    $obs = Observatory::CreateFromConfig($params["obs"]);
+
+    header("Content-Type: application/json");
+    echo json_encode($obs->config);
 });
 
 header('HTTP/1.0 404 Not Found');
