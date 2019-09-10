@@ -4,6 +4,7 @@ require_once __DIR__ . '/../src/functions.php';
 require_once __DIR__ . '/../src/Entities/File.php';
 require_once __DIR__ . '/../src/Upload.php';
 require_once __DIR__ . '/../src/Entities/Observatory.php';
+require_once __DIR__ . '/../src/Entities/User.php';
 require_once __DIR__ . '/../src/exceptions/FileNotFoundException.php';
 
 route('GET', '^/$', function () { });
@@ -60,6 +61,20 @@ route(['GET',], "^/api/observatory/(?<obs>.+)$", function ($params) {
 
     header("Content-Type: application/json");
     echo json_encode($obs->config);
+});
+
+// Routes for Users
+route(['GET',], "^/api/users/?$", function ($params) {
+    $user = User::ListAllUsers();
+
+    header("Content-Type: application/json");
+    echo json_encode($user);
+});
+route(['GET',], "^/api/users/(?<user_login>.+)$", function ($params) {
+    $user = User::CreateFromConfig($params["user_login"]);
+
+    header("Content-Type: application/json");
+    echo json_encode($user->config);
 });
 
 header('HTTP/1.0 404 Not Found');

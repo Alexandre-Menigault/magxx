@@ -1,0 +1,14 @@
+[
+    {
+        "name": "Alexandre Menigault",
+        "login": "alex",
+        "passwd": "",
+        "role": "observer"
+    },
+    {
+        "name": "Benoit Heumez",
+        "login": "ben",
+        "passwd": "",
+        "role": "admin"
+    }
+]
