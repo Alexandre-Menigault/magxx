@@ -163,4 +163,16 @@ class File
             );
         }
     }
+
+    public static function countLines($path)
+    {
+        $linecount = 0;
+        $handle = fopen($path, 'r');
+        while (!feof($handle)) {
+            fgets($handle);
+            $linecount++;
+        }
+        fclose($handle);
+        return $linecount;
+    }
 }

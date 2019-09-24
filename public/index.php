@@ -5,7 +5,9 @@ require_once __DIR__ . '/../src/Entities/File.php';
 require_once __DIR__ . '/../src/Upload.php';
 require_once __DIR__ . '/../src/Entities/Observatory.php';
 require_once __DIR__ . '/../src/Entities/User.php';
+require_once __DIR__ . '/../src/Entities/Measure.php';
 require_once __DIR__ . '/../src/exceptions/FileNotFoundException.php';
+require_once __DIR__ . '/../src/exceptions/CannotWriteOnFileException.php';
 
 route('GET', '^/$', function () { });
 
@@ -75,6 +77,20 @@ route(['GET',], "^/api/users/(?<user_login>.+)$", function ($params) {
 
     header("Content-Type: application/json");
     echo json_encode($user->config);
+});
+route(['POST',], "^/api/measure/?$", function ($params) {
+    $data = json_decode(file_get_contents("php://input"));
+    try {
+        $meas = Measurement::CreateMeasure($data);
+        header(http_response_code(200));
+        echo json_encode($meas);
+    } catch (CannotWriteOnFileException $e) {
+
+        header("Content-Type: application/json");
+        header(http_response_code(500));
+        echo json_encode(array("message" => $e->getMessage()));
+    }
+    // echo var_dump($data);
 });
 
 header('HTTP/1.0 404 Not Found');
