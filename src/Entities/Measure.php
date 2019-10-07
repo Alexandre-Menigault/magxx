@@ -117,7 +117,8 @@ class Measurement
         // Id is number of lines in the file - 1 (remove headers line)
         $this->id = File::countLines($filepath) - 1;
         // Add id, obs, observer and date
-        $parts = [$this->id, $this->observer, join("", explode("/", $this->date))];
+        $parts = [$this->id, $this->observer, $this->date];
+        // $parts = [$this->id, $this->observer, join("-", explode("/", $this->date))];
 
         // Add pillar measurement time and values
         foreach ($this->pillarMeasurements as $pm) {
@@ -159,7 +160,7 @@ class Measurement
 
     public function getFilepath()
     {
-        $d =  DateTime::createFromFormat("d/m/Y", $this->date, new DateTimeZone("UTC"));
+        $d =  DateTime::createFromFormat("Y-m-d", $this->date, new DateTimeZone("UTC"));
         return Path::join($GLOBALS["DATABANK_PATH"], File::DATABANK_MAGSTORE_ROOT, $this->obs, $d->format("Y"), $this->obs . $d->format("Y") . '.abr');
     }
 }
