@@ -88,7 +88,7 @@ route(['POST',], "^/api/measure/?$", function ($params) {
 
         header("Content-Type: application/json");
         header(http_response_code(500));
-        echo json_encode(array("message" => $e->getMessage()));
+        echo json_encode(array("message" => $e->getMessage(), "trace" => $e->getTrace()));
     }
     // echo var_dump($data);
 });
