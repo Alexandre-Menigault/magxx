@@ -93,5 +93,43 @@ route(['POST',], "^/api/measure/?$", function ($params) {
     // echo var_dump($data);
 });
 
+route(['GET'], '^/api/files/seconds/?$', function ($params) {
+    if (!isset($_GET["start"])) {
+        header("Content-Type: application/json");
+        header(http_response_code(400));
+        echo json_encode(array("message" => "Start date is not defined"));
+        return;
+    }
+    if (!isset($_GET["end"])) {
+        header("Content-Type: application/json");
+        header(http_response_code(400));
+        echo json_encode(array("message" => "End date is not defined"));
+        return;
+    }
+    if (!isset($_GET["obs"])) {
+        header("Content-Type: application/json");
+        header(http_response_code(400));
+        echo json_encode(array("message" => "Observatory is not defined"));
+        return;
+    }
+    $start = $_GET["start"];
+    $end = $_GET["end"];
+    $obsCode = $_GET["obs"];
+
+    @ini_set('zlib.output_compression', 9);
+    header("Content-Type: application/json");
+    $fh = fopen('php://output', 'w');
+    fputs($fh, '[');
+    foreach (File::getSecondsFilesPathBetweenTwoDates($obsCode, $start, $end) as $file) {
+        foreach (File::sampleSecondsData($file, new DateTime($start), new DateTime($end), DateInterval::createFromDateString("1 minutes")) as $meanSample) {
+            fputs($fh, json_encode($meanSample) . ',');
+        }
+    }
+
+    fputs($fh, '{}]');
+    $st = ob_get_clean();
+    exit($st);
+});
+
 header('HTTP/1.0 404 Not Found');
 echo '404 Not Found';

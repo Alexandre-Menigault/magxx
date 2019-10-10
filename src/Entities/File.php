@@ -175,4 +175,89 @@ class File
         fclose($handle);
         return $linecount;
     }
+
+    /**
+     * Get the fully qualified filepath of every 
+     * FileFormat = [ObsCode][YYYY][MM][DD]
+     *
+     * @param string $obsCode
+     * @param DateTime $date1
+     * @param DateTime $date2
+     * @return string[] Array of seconds data file path 
+     */
+    public static function getSecondsFilesPathBetweenTwoDates($obsCode, $date1, $date2)
+    {
+        $base = Path::join($GLOBALS["DATABANK_PATH"], 'magstore/', $obsCode);
+        $begin = new DateTime($date1);
+        $end = new DateTime($date2);
+
+        for ($i = $begin; $i < $end; $i->modify("1 day")) {
+            $filename = $obsCode . $i->format("Ymd"); // = FileFormat
+            $file = Path::join($base, $i->format('Y'), "raw", $filename . "-raw.csv");
+            if (is_file($file)) {
+                yield $file;
+            }
+        }
+    }
+
+    /**
+     * Return an array of sampled seconds data
+     * Each value in array is mean of all points within samplerate range
+     *
+     * @param string $filePath
+     * @param DateTime $startDate
+     * @param DateTime $endDate
+     * @param DateInterval $sampleRate
+     * @return number[] mean of all points within samplerate range
+     */
+    public static function sampleSecondsData($filePath, $startDate, $endDate, $sampleRate)
+    {
+        $sum = array("t" => $startDate->getTimestamp(), "ms" => 0, "X" => 0, "Y" => 0, "Z" => 0, "F" => 0);
+        // $sum = array("t" => $startDate, "ms" => 0, "X" => 0, "Y" => 0, "Z" => 0, "F" => 0);
+        $count = 0;
+        $isFirst = true;
+        if (!is_file($filePath)) {
+            throw new FileNotFoundException($filePath);
+        }
+
+        $handle = fopen($filePath, 'r');
+        fgets($handle);
+        while (!feof($handle)) {
+            $line = fgets($handle);
+            if ($line == "") break;
+            $r = explode(",", trim($line));
+            $currentDate = DateTime::createFromFormat("YmdHis", date("YmdHis", intval($r[0])));
+            if ($endDate < $currentDate) break; // If the current date is after end date, stop;
+            $x = floatval($r[2]);
+            $y = floatval($r[3]);
+            $z = floatval($r[4]);
+            $F = floatval($r[5]);
+
+            if ($isFirst) {
+                $blobDate = clone $currentDate;
+                $nextDate = $blobDate->add(($sampleRate));
+                $sum = array("t" => $currentDate->getTimestamp(), "ms" => 0, "X" => $x, "Y" => $y, "Z" => $z, "F" => $F);
+                $count = 1;
+                $isFirst = false;
+            }
+
+            if ($currentDate >= $nextDate) { // if date is after nextdate
+                $currentDate = $currentDate;
+                $nextDate = $currentDate->add($sampleRate);
+
+                yield array("t" => $sum["t"], "ms" => 0, "X" => $sum["X"] / $count, "Y" => $sum["Y"] / $count, "Z" => $sum["Z"] / $count, "F" => $sum["F"] / $count);
+                $sum = array("t" => $currentDate->getTimestamp(), "ms" => 0, "X" => $x, "Y" => $y, "Z" => $z, "F" => $F);
+                $count = 1;
+            } else {
+                $sum["X"] += $x;
+                $sum["Y"] += $y;
+                $sum["Z"] += $z;
+                $sum["F"] += $F;
+                $count++;
+            }
+        }
+        $countSum = count($sum);
+        if ($countSum > 0)
+            yield array("t" => $sum["t"], "ms" => 0, "X" => $sum["X"] / $countSum, "Y" => $sum["Y"] / $countSum, "Z" => $sum["Z"] / $countSum, "F" => $sum["F"] / $countSum);
+    }
 }
