@@ -33,6 +33,7 @@ while ($date < $end_date) {
     $d = $date->format("d");
     foreach ($types as $type) {
         $directory = Path::join($GLOBALS["DATABANK_PATH"], '/upstore', $obs, $Y, $m, $d, $type);
+        if (!id_dir($directory)) continue;
         $files = array_filter(scandir($directory), function ($item) {
             return $item[0] !== '.'; // Retire les dossiers '.', '..' et les fichers/dossiers cachés
         });
@@ -42,7 +43,7 @@ while ($date < $end_date) {
         if (!file_exists($end_dir)) mkdir($end_dir, 0777, true);
 
         if ($type != "raw") {
-            copy(Path::join($directory, $files[2]), Path::join($end_dir, $filename_day));
+            if ($type != "raw" && file_exists(Path::join($directory, $files[2]))) {
             $nb_files++;
         } else {
             $end_file = fopen(Path::join($end_dir, $filename_day), "w");
@@ -51,6 +52,7 @@ while ($date < $end_date) {
             // On parcours les fichiers du dossier du jour en cours
             foreach ($files as $file) {
                 // On récupère chaque ligne du fichier 5min en cours
+                if (file_exists(Path::join($end_dir, $filename_day))) continue;
                 foreach (read(Path::join($directory, $file)) as $line) {
                     fputs($end_file, $line);
                 }
