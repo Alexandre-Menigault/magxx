@@ -54,7 +54,7 @@ while ($date < $end_date) {
             // On parcours les fichiers du dossier du jour en cours
             foreach ($files as $file) {
                 // On récupère chaque ligne du fichier 5min en cours
-                if (file_exists(Path::join($end_dir, $filename_day))) continue;
+                if (!file_exists(Path::join($end_dir, $filename_day))) continue;
                 foreach (read(Path::join($directory, $file)) as $line) {
                     fputs($end_file, $line);
                 }
