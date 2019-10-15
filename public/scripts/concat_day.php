@@ -33,7 +33,7 @@ while ($date < $end_date) {
     $d = $date->format("d");
     foreach ($types as $type) {
         $directory = Path::join($GLOBALS["DATABANK_PATH"], '/upstore', $obs, $Y, $m, $d, $type);
-        if (!id_dir($directory)) continue;
+        if (!is_dir($directory)) continue;
         $files = array_filter(scandir($directory), function ($item) {
             return $item[0] !== '.'; // Retire les dossiers '.', '..' et les fichers/dossiers cachés
         });
