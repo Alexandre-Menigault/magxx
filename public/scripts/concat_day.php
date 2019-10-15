@@ -44,7 +44,9 @@ while ($date < $end_date) {
 
         if ($type != "raw") {
             if ($type != "raw" && file_exists(Path::join($directory, $files[2]))) {
-            $nb_files++;
+                copy(Path::join($directory, $files[2]), Path::join($end_dir, $filename_day));
+                $nb_files++;
+            }
         } else {
             $end_file = fopen(Path::join($end_dir, $filename_day), "w");
             fwrite($end_file, implode(",", $raw_headers) . PHP_EOL);
