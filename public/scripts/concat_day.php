@@ -48,14 +48,16 @@ while ($date < $end_date) {
                 $nb_files++;
             }
         } else {
+            if (!file_exists(Path::join($directory, $file))) continue;
             $end_file = fopen(Path::join($end_dir, $filename_day), "w");
             fwrite($end_file, implode(",", $raw_headers) . PHP_EOL);
 
             // On parcours les fichiers du dossier du jour en cours
             foreach ($files as $file) {
                 // On récupère chaque ligne du fichier 5min en cours
-                if (!file_exists(Path::join($end_dir, $filename_day))) continue;
+
                 foreach (read(Path::join($directory, $file)) as $line) {
+                    if (!$end_file) continue;
                     fputs($end_file, $line);
                 }
                 $nb_files++;
