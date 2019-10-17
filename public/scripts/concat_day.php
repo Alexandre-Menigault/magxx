@@ -48,7 +48,7 @@ while ($date < $end_date) {
                 $nb_files++;
             }
         } else {
-            if (!file_exists(Path::join($directory, $file))) continue;
+            if (!file_exists(Path::join($end_dir, $filename_day))) continue;
             $end_file = fopen(Path::join($end_dir, $filename_day), "w");
             fwrite($end_file, implode(",", $raw_headers) . PHP_EOL);
 
