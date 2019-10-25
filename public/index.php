@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../src/functions.php';
 require_once __DIR__ . '/../src/Entities/File.php';
+require_once __DIR__ . '/../src/Teno.php';
 require_once __DIR__ . '/../src/Upload.php';
 require_once __DIR__ . '/../src/Entities/Observatory.php';
 require_once __DIR__ . '/../src/Entities/User.php';
@@ -94,22 +95,24 @@ route(['POST',], "^/api/measure/?$", function ($params) {
 });
 
 route(['GET'], '^/api/files/seconds/?$', function ($params) {
+    $errors = [];
     if (!isset($_GET["start"])) {
-        header("Content-Type: application/json");
-        header(http_response_code(400));
-        echo json_encode(array("message" => "Start date is not defined"));
-        return;
+        array_push($errors, "Start date is not defined");
+    } else if (isDateValid($_GET["start"])) {
+        array_push($errors, "Start date (" . $_GET['start'] . ") is not a valid date: Format YYYY-MM-DD");
     }
     if (!isset($_GET["end"])) {
-        header("Content-Type: application/json");
-        header(http_response_code(400));
-        echo json_encode(array("message" => "End date is not defined"));
-        return;
+        array_push($errors, "End date is not defined");
+    } else if (isDateValid($_GET["end"])) {
+        array_push($errors, "End date (" . $_GET['end'] . ") is not a valid date: Format YYYY-MM-DD");
     }
     if (!isset($_GET["obs"])) {
+        array_push($errors, "Observatory is not defined");
+    }
+    if (count($errors) > 0) {
         header("Content-Type: application/json");
         header(http_response_code(400));
-        echo json_encode(array("message" => "Observatory is not defined"));
+        echo json_encode($errors);
         return;
     }
     $start = $_GET["start"];
@@ -130,6 +133,69 @@ route(['GET'], '^/api/files/seconds/?$', function ($params) {
     $st = ob_get_clean();
     exit($st);
 });
+
+route(["GET"], '^/api/teno/utc$', function ($params) {
+    if (!isset($_GET["teno"])) {
+        header(http_response_code(400));
+        echo "Teno is not defined";
+        return;
+    }
+    $val = intval($_GET["teno"]);
+    $teno = Teno::toUTC($val);
+
+    header(http_response_code(200));
+    header("Content-Type: application/json");
+    echo json_encode($teno);
+});
+
+route(["GET"], '^/api/utc/teno$', function ($params) {
+    if (!isset($_GET["year"], $_GET["day"], $_GET["month"], $_GET["hour"], $_GET["minutes"], $_GET["seconds"])) {
+        header(http_response_code(400));
+        echo "Request malformed";
+        return;
+    }
+
+    $year = intval($_GET["year"]);
+    $month = intval($_GET["month"]);
+    $day = intval($_GET["day"]);
+    $hour = intval($_GET["hour"]);
+    $minutes = intval($_GET["minutes"]);
+    $seconds = intval($_GET["seconds"]);
+
+
+    $teno = Teno::fromYYYYDDMMHHMMSS($year, $month, $day, $hour, $minutes, $seconds);
+
+    header(http_response_code(200));
+    header("Content-Type: application/json");
+    echo json_encode($teno);
+});
+
+route(["POST"], '^/api/teno/utc/batch$', function ($params) {
+    if (!isset($_POST["teno_obj"])) {
+        header(http_response_code(400));
+        header("Content-Type: application/json");
+        echo json_encode(array("error" => "teno_obj is not defined"));
+        return;
+    }
+    $teno_obj = json_decode($_POST["teno_obj"]);
+    $end = array();
+
+
+    foreach ($teno_obj as $key => $teno) {
+        $end[$key] = Teno::toUTC(intval($teno));
+    }
+
+    header(http_response_code(200));
+    header("Content-Type: application/json");
+    echo json_encode($end);
+});
+
+function isDateValid($dateString, $format = "Y-m-d")
+{
+    date_default_timezone_set('UTC');
+    $date = DateTime::createFromFormat($format, $dateString);
+    return $date && $date->format($format) === $date;
+}
 
 header('HTTP/1.0 404 Not Found');
 echo '404 Not Found';
