@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/../../config.php';
 require_once __DIR__ . '/../../src/Path.php';
+require_once __DIR__ . '/../../src/Teno.php';
 
 $time_start = microtime(true);
 
@@ -12,13 +13,24 @@ $obs = isset($_GET["obs"]) ? $_GET["obs"] : "CLF3";
 
 echo $obs, PHP_EOL;
 
-$date = new DateTime();
-$date->setTime(0, 0, 0, 0);
-$date->sub(new DateInterval('P' . $interval . 'D'));
 
-$end_date = new DateTime();
-$end_date->setTime(0, 0, 0, 0);
-$date->sub(new DateInterval('P0D'));
+
+$date = new DateTime("2019-09-17T00:00:00", new DateTimeZone("UTC"));
+$Y = 2019;
+$m = 8;
+$d = 18;
+// $Y = intval($date->format("Y"));
+// $m = intval($date->format("m"));
+// $d = intval($date->format("d"));
+// $end_teno = Teno::fromYYYYDDMMHHMMSS(2019, 8, 19, 0, 0, 0)->teno; // Basically today at 00:00:00
+$end_teno = Teno::fromYYYYDDMMHHMMSS($Y, $m, $d + 1, 0, 0, 0)->teno; // Basically today at 00:00:00
+$cur_teno = $end_teno - intval($interval) * Teno::$DAYS_SECONDS;
+// $date->setTime(0, 0, 0, 0);
+// $date->sub(new DateInterval('P' . $interval . 'D'));
+
+// $end_date = new DateTime();
+// $end_date->setTime(0, 0, 0, 0);
+// $date->sub(new DateInterval('P0D'));
 
 $nb_files = 0;
 $day_count = 0;
@@ -26,19 +38,23 @@ $types = ["raw", "env", "log"];
 
 // TODO: concat tous les fichiers de tous les observatoires
 // On parcours l'intervale depuis `$date` jusqu'a `$end_date`
-while ($date < $end_date) {
+
+
+while ($cur_teno < $end_teno) {
     // On récupère les infos du jour en cours
-    $Y = $date->format("Y");
-    $m = $date->format("m");
-    $d = $date->format("d");
+    $d = Teno::toUTC($cur_teno);
+    $Y = $d->yyyy;
+    $m = Teno::getFullTime($d->mmmm);
+    $day = Teno::getFullTime($d->dddd);
     foreach ($types as $type) {
-        $directory = Path::join($GLOBALS["DATABANK_PATH"], '/upstore', $obs, $Y, $m, $d, $type);
+        $directory = Path::join($GLOBALS["DATABANK_PATH"], '/upstore', $obs, $Y, $m, $day, $type);
         if (!is_dir($directory)) continue;
+        var_dump($directory);
         $files = array_filter(scandir($directory), function ($item) {
             return $item[0] !== '.'; // Retire les dossiers '.', '..' et les fichers/dossiers cachés
         });
         // On crée un fichier vide du jour
-        $filename_day = $obs . $Y . $m . $d . "-" . $type . ".csv";
+        $filename_day = $obs . $d->teno . "-" . $type . ".csv";
         $end_dir =  Path::join($GLOBALS["DATABANK_PATH"], "/magstore", $obs, $Y, $type);
         if (!file_exists($end_dir)) mkdir($end_dir, 0777, true);
 
@@ -48,23 +64,28 @@ while ($date < $end_date) {
                 $nb_files++;
             }
         } else {
-            if (!file_exists(Path::join($end_dir, $filename_day))) continue;
+            var_dump(Path::join($end_dir, $filename_day));
+            // if (!file_exists(Path::join($end_dir, $filename_day))) continue;
             $end_file = fopen(Path::join($end_dir, $filename_day), "w");
             fwrite($end_file, implode(",", $raw_headers) . PHP_EOL);
-
             // On parcours les fichiers du dossier du jour en cours
             foreach ($files as $file) {
-                // On récupère chaque ligne du fichier 5min en cours
-
+                // On récupère chaque ligne du fichier 5min en 
                 foreach (read(Path::join($directory, $file)) as $line) {
                     if (!$end_file) continue;
+                    //========================
+                    // TODO: Remove when get data from ENO
+                    $splitLine = explode(",", $line);
+                    $splitLine[0] = Teno::fromTimestamp(intval($splitLine[0]))->teno;
+                    $line = implode(",", $splitLine);
+                    //========================
                     fputs($end_file, $line);
                 }
                 $nb_files++;
             }
         }
     }
-    $date->add(new DateInterval('P1D'));
+    $cur_teno += Teno::$DAYS_SECONDS;
     $day_count++;
 }
 

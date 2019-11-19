@@ -12,6 +12,12 @@
  */
 class Teno
 {
+    public static $FORMATS = array("YmdHis", "Ymd");
+
+    public static $DAYS_SECONDS = 86400;
+    public static $HOURS_SECONDS = 3600;
+    public static $MINUTES_SECONDS = 60;
+
     public $teno = 0;
     public $yyyy = 2000;
     public $mmmm = 1;
@@ -41,6 +47,47 @@ class Teno
         $this->hh = $hh;
         $this->mm = $mm;
         $this->ss = $ss;
+    }
+
+    public function format($format = "YmdHis")
+    {
+        if (in_array($format, Teno::$FORMATS)) {
+            if ($format == "YmdHis")
+                return $this->yyyy . $this->mmmm . $this->dddd . $this->hh . $this->mm . $this->ss;
+            if ($format == "Ymd")
+                return $this->yyyy . $this->mmmm . $this->dddd;
+        }
+        return "";
+    }
+
+    public function __toString()
+    {
+
+        return $this->teno . "";
+    }
+
+    public function isAfterNow()
+    {
+        $now  = new DateTime("now", new DateTimeZone('UTC'));
+        $mmmm = Teno::getFullTime($this->mmmm);
+        $dddd = Teno::getFullTime($this->dddd);
+        $hh =  Teno::getFullTime($this->hh);
+        $mm = Teno::getFullTime($this->mm);
+        $ss = Teno::getFullTime($this->ss);
+        $d = DateTime::createFromFormat("YmdHis", $this->yyyy . $mmmm . $dddd  . $hh . $mm . $ss, new DateTimeZone("UTC"));
+        return $d == false || $now->getTimestamp() > $d->getTimestamp();
+    }
+
+    /**
+     * Get the 2 digit value of a time (month, day, hour, minute, second)
+     *
+     * @param int $time
+     * @return string
+     */
+    public static function getFullTime($time)
+    {
+        if (!is_numeric($time)) return "-1";
+        return $time < 10 ? "0" . $time : $time;
     }
 
     /** 
@@ -281,5 +328,23 @@ class Teno
         $total += Teno::countDaysUntil($dddd, $mmmm, $yyyy) * 86400;
         $total += Teno::getNumberOfLeaps($total);
         return new Teno($total, $yyyy, $mmmm, $dddd, $hh, $mm, $ss);
+    }
+
+    /**
+     * Get Teno object from Timestamp (including milliseconds)
+     * @param int $timestamp
+     * @return Teno
+     */
+    public static function fromTimestamp($timestamp)
+    {
+        $date = (new DateTime("@" . $timestamp))->setTimezone(new DateTimeZone("UTC"));
+        return Teno::fromYYYYDDMMHHMMSS(
+            intval($date->format("Y")),
+            intval($date->format("m")),
+            intval($date->format("d")),
+            intval($date->format("H")),
+            intval($date->format("i")),
+            intval($date->format("s"))
+        );
     }
 }

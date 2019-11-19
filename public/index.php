@@ -15,7 +15,7 @@ route('GET', '^/$', function () { });
 route("GET", '^/api/data/(?<obs>.+)/(?<date>.+)/(?<type>.+)$', function ($params) {
     $interval = isset($_GET["interval"]) ? $_GET["interval"] : "1d";
     try {
-        $file = new File($params["obs"], $params["type"], $params["date"], $interval);
+        $file = new File($params["obs"], $params["type"], intval($params["date"]), $interval);
         @ini_set('zlib.output_compression', 0);
         header(http_response_code(200));
         header("Content-Type: application/json");

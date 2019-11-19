@@ -2,6 +2,7 @@
 
 
 require_once __DIR__ . "/../Path.php";
+require_once __DIR__ . "/../Teno.php";
 require_once __DIR__ . "/File.php";
 
 require_once __DIR__ . "/../exceptions/CannotWriteOnFileException.php";
@@ -38,7 +39,7 @@ class IndexMeasurement
 class TimedValue
 {
     /**
-     * @var string $time
+     * @var Teno $time
      */
     public $time;
     /**
@@ -48,16 +49,17 @@ class TimedValue
 
     function __construct($t, $v)
     {
-        $this->time = $t;
+        $HHMMSS = explode(":", $t);
+        $this->time = Teno::fromYYYYDDMMHHMMSS(2000, 1, 1, intval($HHMMSS[0]), intval($HHMMSS[1]), intval($HHMMSS[2]));
         $this->value = $v;
     }
 }
 
 class Measurement
 {
-    /** @var int */
+    /** @var int $id*/
     public $id;
-    /** @var string $date*/
+    /** @var Teno $date*/
     public $date;
     /** @var string $obs*/
     public $obs;
@@ -78,7 +80,10 @@ class Measurement
         // TODO: validate data
         $meas->observer = $data->observer;
         $meas->obs = $data->obs;
-        $meas->date = $data->date;
+
+        $YYYYMMDD = explode("-", $data->date);
+
+        $meas->date =  Teno::fromYYYYDDMMHHMMSS(intval($YYYYMMDD[0]), intval($YYYYMMDD[1]), intval($YYYYMMDD[2]), 0, 0, 0);
 
         $meas->pillarMeasurements = [];
         foreach ($data->pillarMeasurements as $pm) {
@@ -151,7 +156,7 @@ class Measurement
                 array_push($parts, $time, $value);
             }
         }
-        // Write to wile and add a new line char
+        // Write to file and add a new line char
 
         if (!file_put_contents($filepath, join(',', $parts) . PHP_EOL, FILE_APPEND)) {
             throw CannotWriteOnFileException($filepath, "Cannot write content of new measure");
@@ -160,7 +165,6 @@ class Measurement
 
     public function getFilepath()
     {
-        $d =  DateTime::createFromFormat("Y-m-d", $this->date, new DateTimeZone("UTC"));
-        return Path::join($GLOBALS["DATABANK_PATH"], File::DATABANK_MAGSTORE_ROOT, $this->obs, $d->format("Y"), $this->obs . $d->format("Y") . '.abr');
+        return Path::join($GLOBALS["DATABANK_PATH"], File::DATABANK_MAGSTORE_ROOT, $this->obs, $this->date->yyyy, $this->obs . $this->date->yyyy . '.abr');
     }
 }

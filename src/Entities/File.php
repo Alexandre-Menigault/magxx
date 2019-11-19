@@ -1,6 +1,8 @@
 <?php
 
 include_once __DIR__ . "/../exceptions/FileNotFoundException.php";
+include_once __DIR__ . "/../Teno.php";
+include_once __DIR__ . "/../Path.php";
 
 class File
 {
@@ -24,16 +26,16 @@ class File
     /**
      * The infered date from the file name
      *
-     * @var \DateTime
+     * @var \Teno
      */
     public $date;
 
     /**
      * The date interval data to get between
      *
-     * @var \DateTime
+     * @var string
      */
-    public $intervalDate;
+    public $interval;
 
     /**
      * The codename of the observatory
@@ -58,31 +60,76 @@ class File
      */
     public $day;
 
-    function __construct($obs, $type, $posix, $interval = self::INTERVAL_DAY)
+    // function __construct($obs, $type, $posix, $interval = self::INTERVAL_DAY)
+    // {
+    //     $this->obs = $obs;
+    //     $this->type = $type;
+    //     $this->date = DateTime::createFromFormat("YmdHis", date("YmdHis", $posix), new DateTimeZone("UTC"));
+    //     $this->intervalDate = clone $this->date;
+    //     if ($interval == self::INTERVAL_DAY)
+    //         $this->intervalDate->add(new DateInterval("P1D"));
+    //     else if ($interval == self::INTERVAL_2HOURS)
+    //         $this->intervalDate->add(new DateInterval("PT2H"));
+
+    //     $filepath = $this->getFilepath();
+    //     if (!is_file($filepath)) {
+    //         throw new FileNotFoundException($filepath);
+    //     }
+    // }
+
+    function __construct($obs, $type, $teno, $interval = self::INTERVAL_DAY)
     {
+        if (!$obs || !$type) {
+            throw new Exception("Malformed");
+        }
         $this->obs = $obs;
         $this->type = $type;
-        $this->date = DateTime::createFromFormat("YmdHis", date("YmdHis", $posix), new DateTimeZone("UTC"));
-        $this->intervalDate = clone $this->date;
-        if ($interval == self::INTERVAL_DAY)
-            $this->intervalDate->add(new DateInterval("P1D"));
-        else if ($interval == self::INTERVAL_2HOURS)
-            $this->intervalDate->add(new DateInterval("PT2H"));
-
-        $filepath = $this->getFilepath();
-        if (!is_file($filepath)) {
-            throw new FileNotFoundException($filepath);
-        }
+        $this->interval = $interval;
+        $this->date = Teno::toUTC($teno);
     }
 
-    public function getFilepath($upload = false)
+
+    /**
+     * Compute the filepath for the upcpming uploaded files
+     *
+     * @return string
+     */
+    public function computeFilePath()
     {
-        return $GLOBALS["DATABANK_PATH"] . ($upload == false ? self::DATABANK_MAGSTORE_ROOT : self::DATABANK_UPLINK_ROOT) .
-            DIRECTORY_SEPARATOR . $this->obs . DIRECTORY_SEPARATOR . ($upload == false ? $this->date->format("Y") : ($this->date->format("Y") . DIRECTORY_SEPARATOR . $this->date->format("m") . DIRECTORY_SEPARATOR . $this->date->format("d"))) . DIRECTORY_SEPARATOR .
-            $this->type . DIRECTORY_SEPARATOR .
-            $this->obs . ($upload == false ? $this->date->format("Ymd") : $this->date->format("YmdHis")) . ($upload == false ? "-" : ".") . $this->type . ".csv";
+        return Path::join(
+            $GLOBALS["DATABANK_PATH"] . self::DATABANK_UPLINK_ROOT,
+            $this->obs,
+            $this->date->yyyy,
+            Teno::getFullTime($this->date->mmmm),
+            Teno::getFullTime($this->date->dddd),
+            $this->type,
+            $this->obs . "-" . $this->date->teno . "." . $this->type . ".csv"
+        );
     }
 
+
+    /**
+     * Get the filepath of the concat files
+     *
+     * @return string
+     */
+    public function getFilepath()
+    {
+        $teno = Teno::fromYYYYDDMMHHMMSS($this->date->yyyy, $this->date->mmmm, $this->date->dddd, 0, 0, 0);
+        return Path::join(
+            $GLOBALS["DATABANK_PATH"] . self::DATABANK_MAGSTORE_ROOT,
+            $this->obs,
+            $this->date->yyyy,
+            $this->type,
+            $this->obs . $teno->teno . "-" . $this->type . ".csv"
+        );
+    }
+
+    /**
+     * Reads files and yields parsed lines
+     *
+     * @return Generator|string
+     */
     public function read()
     {
         $link = $this->getFilepath();
@@ -97,6 +144,7 @@ class File
                     $i++;
                 } else {
                     $parsed = $this->parseLine($line);
+
                     $isBetweenInterval = $this->isLineBetweenInterval($parsed);
                     if ($isBetweenInterval == 1) {
                         $end = true;
@@ -108,13 +156,32 @@ class File
         } else yield "File not found: " . $link;
     }
 
+
+    /**
+     * Get if a data line is in a date interval
+     *
+     * @param string $line - Data csv format
+     * @return int Returns 0 if in interval. Returns 1 if data line is after interval. Returns 1 if data time is before interval
+     */
     private function isLineBetweenInterval($line)
     {
-        $d = DateTime::createFromFormat("YmdHis", date("YmdHis", $line["t"]), new DateTimeZone("UTC"));
-        $offset = (new DateTime())->getTimezone()->getOffset($d);
-        $d->sub(new DateInterval("PT" . $offset . "S"));
-        if ($this->intervalDate->getTimestamp() < $d->getTimestamp()) return 1;
-        else if ($this->date->getTimestamp() <= $d->getTimestamp() && $this->intervalDate->getTimestamp() >= $d->getTimestamp())
+        $end_date = $this->date->teno;
+        $moment = mb_strcut($this->interval, -1, 1);
+        $amount = intval(mb_strcut($this->interval, 0, strlen($this->interval) - 1));
+        switch ($moment) {
+            case "d":
+                $end_date += $amount * Teno::$DAYS_SECONDS;
+                break;
+            case "h":
+                $end_date += $amount * Teno::$HOURS_SECONDS;
+                break;
+            case "m":
+                $end_date += $amount * Teno::$MINUTES_SECONDS;
+                break;
+        }
+        $d = intval($line["t"]);
+        if ($end_date < $d) return 1;
+        else if ($this->date->teno <= $d && $end_date >= $d)
             return 0;
         return -1;
         // return ($this->date->getTimestamp() <= $d->getTimestamp() && $this->intervalDate->getTimestamp() >= $d->getTimestamp());
@@ -164,6 +231,12 @@ class File
         }
     }
 
+    /**
+     * Count number of lines of a specific file
+     *
+     * @param string $path
+     * @return int
+     */
     public static function countLines($path)
     {
         $linecount = 0;
@@ -177,8 +250,8 @@ class File
     }
 
     /**
-     * Get the fully qualified filepath of every 
-     * FileFormat = [ObsCode][YYYY][MM][DD]
+     * - Get the fully qualified filepath of every 
+     * - FileFormat = [ObsCode][YYYY][MM][DD]
      *
      * @param string $obsCode
      * @param DateTime $date1

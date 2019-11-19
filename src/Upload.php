@@ -3,9 +3,6 @@
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/Entities/File.php';
 
-/**
- * Undocumented class
- */
 class Upload
 {
 
@@ -19,9 +16,8 @@ class Upload
                 $type = explode(".", $string[1])[0];
 
                 list($code, $date) = Upload::parseFile($string[0]);
-
-                $file = new File($code, $type, $date->getTimestamp());
-                $path = $file->getFilepath(true);
+                $file = new File($code, $type, intval($date));
+                $path = $file->computeFilePath();
                 $dirname = pathinfo($path)["dirname"];
 
                 // If directory doesn't exists, create it and all directories before it as well
@@ -49,7 +45,7 @@ class Upload
             } catch (Error $e) {
                 $error = new Error("Cannot parse filename " . $filename);
                 $errJson = array(
-                    "message" => $error->getMessage(),
+                    "message" => $e->getMessage(),
                     "trace" => $error->getTrace(),
                 );
                 error_log(json_encode($errJson));
@@ -68,18 +64,18 @@ class Upload
 
     static function parseFile($string)
     {
-        $dateFormat = 'YmdHis';
-        $dateLength = 14;
-        if (mb_strlen($string) > $dateLength) {
-            $code = mb_strtoupper(mb_strcut($string, 0, -$dateLength));
-            $date = mb_strcut($string, -$dateLength);
-            if ($code) {
-                if (false !== $date = DateTime::createFromFormat($dateFormat, $date)) {
-                    return [$code, $date];
-                }
-            }
+        // TODO: Remplacer le format de fichier
+        // Trop compliqué à parser en étant sur à 100% du code de l'observatoire
+        // [OBS_CODE][teno]-[type].csv
+        // par
+        // [OBS_CODE]-[teno]-[type].csv
+        $code = mb_strtoupper(mb_strcut($string, 0, 4));
+        $date = Teno::toUTC(mb_strcut($string, 4));
+        if ($date->teno < $GLOBALS["START_TENO"]) {
+            $code = mb_strcut($string, 0, 3);
+            $date = Teno::toUTC(mb_strcut($string, 3));
+            echo $code . " - " . $date->teno . "\n";
         }
-
-        return null;
+        return [$code, $date->teno];
     }
 }
