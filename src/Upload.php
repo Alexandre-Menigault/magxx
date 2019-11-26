@@ -64,18 +64,9 @@ class Upload
 
     static function parseFile($string)
     {
-        // TODO: Remplacer le format de fichier
-        // Trop compliqué à parser en étant sur à 100% du code de l'observatoire
-        // [OBS_CODE][teno]-[type].csv
-        // par
-        // [OBS_CODE]-[teno]-[type].csv
-        $code = mb_strtoupper(mb_strcut($string, 0, 4));
-        $date = Teno::toUTC(mb_strcut($string, 4));
-        if ($date->teno < $GLOBALS["START_TENO"]) {
-            $code = mb_strcut($string, 0, 3);
-            $date = Teno::toUTC(mb_strcut($string, 3));
-            echo $code . " - " . $date->teno . "\n";
-        }
+        $parts = expolode($string);
+        $code = $parts[0];
+        $date = Teno::toUTC($parts[1]);
         return [$code, $date->teno];
     }
 }
