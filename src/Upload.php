@@ -64,7 +64,7 @@ class Upload
 
     static function parseFile($string)
     {
-        $parts = expolode("-", $string);
+        $parts = explode("-", $string);
         $code = $parts[0];
         $date = Teno::toUTC($parts[1]);
         return [$code, $date->teno];
