@@ -12,10 +12,12 @@ class Upload
         foreach ($_FILES as $fileId => $f) {
             $filename = $f["name"];
             try {
-                $string = explode("-", $filename);
-                $type = explode(".", $string[1])[0];
+                $parts = explode("-", $filename);
+                $code = $parts[0];
+                $date = $parts[1];
+                $type = explode(".", $parts[2])[0];
 
-                list($code, $date) = Upload::parseFile($string[0]);
+                //list($code, $date) = Upload::parseFile($string[0]);
                 $file = new File($code, $type, intval($date));
                 $path = $file->computeFilePath();
                 $dirname = pathinfo($path)["dirname"];
