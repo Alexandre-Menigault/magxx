@@ -24,7 +24,7 @@ $Y = intval($date->format("Y"));
 $m = intval($date->format("m"));
 $d = intval($date->format("d"));
 // $end_teno = Teno::fromYYYYDDMMHHMMSS(2019, 8, 19, 0, 0, 0)->teno; // Basically today at 00:00:00
-$end_teno = Teno::fromYYYYDDMMHHMMSS($Y, $m, $d + 1, 0, 0, 0)->teno; // Basically today at 00:00:00
+$end_teno = Teno::fromYYYYDDMMHHMMSS($Y, $m, $d, 0, 0, 0)->teno; // Basically today at 00:00:00
 $cur_teno = $end_teno - intval($interval) * Teno::$DAYS_SECONDS;
 // $date->setTime(0, 0, 0, 0);
 // $date->sub(new DateInterval('P' . $interval . 'D'));
