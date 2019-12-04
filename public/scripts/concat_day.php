@@ -6,7 +6,7 @@ require_once __DIR__ . '/../../src/Teno.php';
 
 $time_start = microtime(true);
 
-$raw_headers = ["t", "ms", "X", "Y", "Z", "F"];
+$raw_headers = ["t", "ms", "X", "Y", "Z", "F", "flag"];
 
 $interval = isset($_GET["days"]) ? $_GET["days"] : "1";
 $obs = isset($_GET["obs"]) ? $_GET["obs"] : "CLF3";
@@ -74,7 +74,7 @@ while ($cur_teno < $end_teno) {
                 // On récupère chaque ligne du fichier 5min en 
                 foreach (read(Path::join($directory, $file)) as $line) {
                     if (!$end_file) continue;
-                    fputs($end_file, $line);
+                    fputs($end_file, trim($line) . "," . "0" . PHP_EOL);
                 }
                 $nb_files++;
             }
