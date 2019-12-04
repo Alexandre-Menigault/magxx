@@ -1,0 +1,20 @@
+{
+    "date": "12-04-2019",
+    "heure": "14:07",
+    "orientation": "HDZ",
+    "azimmuth_reference": 0.136776,
+    "euler_a": 0,
+    "euler_b": 0,
+    "euler_g": 0,
+    "k_value": 450,
+    "vecrotial_instrument": "VM391",
+    "scalar_instrument": "SM100",
+    "di-flux_ref": "Zeiss010A+BartMag01H",
+    "di-flux_sensitivity": 0.999,
+    "theodolite_graduation": "grade",
+    "fa-fm": -0.57,
+    "nb_obs": 1500,
+    "noise_V": "0.0 0.0 0.0 0.0",
+    "noise_Va": "0.0 0.0 0.0",
+    "search_interval": 5
+}
