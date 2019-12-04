@@ -83,6 +83,7 @@ route(['POST',], "^/api/measure/?$", function ($params) {
     $data = json_decode(file_get_contents("php://input"));
     try {
         $meas = Measurement::CreateMeasure($data);
+        header("Content-Type: application/json");
         header(http_response_code(200));
         echo json_encode($meas);
     } catch (CannotWriteOnFileException $e) {
@@ -188,6 +189,55 @@ route(["POST"], '^/api/teno/utc/batch$', function ($params) {
     header(http_response_code(200));
     header("Content-Type: application/json");
     echo json_encode($end);
+});
+
+route(["GET"], '^/api/file/tree/?$', function ($params) {
+
+    $path = "";
+    if (!isset($_GET["path"])) $path = Path::join("/");
+    else $path = Path::join("/", $_GET["path"]);
+
+    $baseURI = Path::join($GLOBALS["DATABANK_PATH"], "magstore", $path);
+
+    if (strpos($path, '..') !== false || strpos($path, '../' . DIRECTORY_SEPARATOR) !== false) {
+
+        header(http_response_code(400));
+        header("Content-Type: application/json");
+        echo json_encode(array("message" => "Cannot use '../' in path", "path" => $path));
+        return;
+    }
+    if (!is_dir($baseURI)) {
+        header(http_response_code(404));
+        header("Content-Type: application/json");
+        echo json_encode(array("message" => "Observatory or year not valid"));
+        return;
+    }
+
+    function array_group_by(array $arr, callable $key_selector)
+    {
+        $result = array();
+        foreach ($arr as $i) {
+            $key = call_user_func($key_selector, $i);
+            $result[$key][] = $i;
+        }
+        return $result;
+    }
+
+    $files = scandir($baseURI);
+    $res = array();
+    for ($i = 0; $i < count($files); $i++) {
+        if (in_array($files[$i], array('..', '.'))) continue; // Ignore .. and . directories
+        if (is_dir(Path::join($baseURI, $files[$i])))
+            array_push($res, array("name" => $files[$i], "type" => "group"));
+        if (is_file(Path::join($baseURI, $files[$i])))
+            array_push($res, array("name" => $files[$i], "type" => "file"));
+    }
+    $res = array_group_by($res, function ($i) {
+        return $i["type"];
+    });
+    header(http_response_code(200));
+    header("Content-Type: application/json");
+    echo json_encode($res);
 });
 
 function isDateValid($dateString, $format = "Y-m-d")
