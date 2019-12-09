@@ -121,6 +121,7 @@ class File
             $this->obs,
             $this->date->yyyy,
             $this->type,
+            // TODO: change format to OBSX-teno-type.csv
             $this->obs . $teno->teno . "-" . $this->type . ".csv"
         );
     }
@@ -266,6 +267,7 @@ class File
 
         for ($i = $begin; $i < $end; $i->modify("1 day")) {
             $filename = $obsCode . $i->format("Ymd"); // = FileFormat
+            // TODO: change format to OBSX-teno-type.csv
             $file = Path::join($base, $i->format('Y'), "raw", $filename . "-raw.csv");
             if (is_file($file)) {
                 yield $file;

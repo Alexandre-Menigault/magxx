@@ -122,8 +122,15 @@ class Measurement
         // Id is number of lines in the file - 1 (remove headers line)
         $this->id = File::countLines($filepath) - 1;
         // Add id, obs, observer and date
+
+
+        // TODO: change DATE to YYYY-MM-SS
         $parts = [$this->id, $this->observer, $this->date];
         // $parts = [$this->id, $this->observer, join("-", explode("/", $this->date))];
+
+
+
+        // TODO: change TIME to HH:MM:SS on each time 
 
         // Add pillar measurement time and values
         foreach ($this->pillarMeasurements as $pm) {

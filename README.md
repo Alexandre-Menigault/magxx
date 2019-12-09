@@ -49,6 +49,7 @@
 ``` txt
     Uploads a data file to the observatory upstore.
     The filename must be formated as:
+            // TODO: change format to OBSX-teno-type.csv
         <OBS><Teno>-<type>.csv
     Once uploaded the file is named:
         <OBS>-<Teno>-<type>.csv

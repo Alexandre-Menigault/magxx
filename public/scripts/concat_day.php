@@ -55,6 +55,7 @@ while ($cur_teno < $end_teno) {
             return $item[0] !== '.'; // Retire les dossiers '.', '..' et les fichers/dossiers cachés
         });
         // On crée un fichier vide du jour
+        // TODO: change format to OBSX-teno-type.csv
         $filename_day = $obs . $d->teno . "-" . $type . ".csv";
         $end_dir =  Path::join($GLOBALS["DATABANK_PATH"], "/magstore", $obs, $Y, $type);
         if (!file_exists($end_dir)) mkdir($end_dir, 0777, true);
@@ -74,6 +75,12 @@ while ($cur_teno < $end_teno) {
                 // On récupère chaque ligne du fichier 5min en 
                 foreach (read(Path::join($directory, $file)) as $line) {
                     if (!$end_file) continue;
+                    //======================== 
+                    // TODO: Remove when get data from ENO 
+                    $splitLine = explode(",", $line);
+                    $splitLine[0] = Teno::fromTimestamp(intval($splitLine[0]))->teno;
+                    $line = implode(",", $splitLine);
+                    //======================== 
                     fputs($end_file, trim($line) . "," . "0" . PHP_EOL);
                 }
                 $nb_files++;
