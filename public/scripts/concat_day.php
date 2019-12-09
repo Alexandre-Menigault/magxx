@@ -75,12 +75,6 @@ while ($cur_teno < $end_teno) {
                 // On récupère chaque ligne du fichier 5min en 
                 foreach (read(Path::join($directory, $file)) as $line) {
                     if (!$end_file) continue;
-                    //======================== 
-                    // TODO: Remove when get data from ENO 
-                    $splitLine = explode(",", $line);
-                    $splitLine[0] = Teno::fromTimestamp(intval($splitLine[0]))->teno;
-                    $line = implode(",", $splitLine);
-                    //======================== 
                     fputs($end_file, trim($line) . "," . "0" . PHP_EOL);
                 }
                 $nb_files++;
