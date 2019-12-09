@@ -283,6 +283,7 @@ class Teno
         if ($teno < 0) return new Teno(0, 2000, 1, 1, 0, 0, 0);
 
         // $nld = Teno::getNumberOfLeaps($teno);
+        $nld = 0;
         $s = ($teno - $nld) % 86400;
 
         $hh = floor($s / 3600);
