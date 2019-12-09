@@ -282,7 +282,7 @@ class Teno
     {
         if ($teno < 0) return new Teno(0, 2000, 1, 1, 0, 0, 0);
 
-        $nld = Teno::getNumberOfLeaps($teno);
+        // $nld = Teno::getNumberOfLeaps($teno);
         $s = ($teno - $nld) % 86400;
 
         $hh = floor($s / 3600);
@@ -326,7 +326,7 @@ class Teno
         $total += $mm * 60;
         $total += $hh * 3600;
         $total += Teno::countDaysUntil($dddd, $mmmm, $yyyy) * 86400;
-        $total += Teno::getNumberOfLeaps($total);
+        // $total += Teno::getNumberOfLeaps($total);
         return new Teno($total, $yyyy, $mmmm, $dddd, $hh, $mm, $ss);
     }
 
