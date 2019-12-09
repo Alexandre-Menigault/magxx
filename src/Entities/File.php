@@ -146,7 +146,7 @@ class File
                 } else {
                     $parsed = $this->parseLine($line);
 
-                    $isBetweenInterval = 1;
+                    $isBetweenInterval = 0;
                     // $isBetweenInterval = $this->isLineBetweenInterval($parsed);
                     if ($isBetweenInterval == 1) {
                         $end = true;
