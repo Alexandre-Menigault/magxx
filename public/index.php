@@ -83,9 +83,25 @@ route(['POST',], "^/api/measure/?$", function ($params) {
     $data = json_decode(file_get_contents("php://input"));
     try {
         $meas = Measurement::CreateMeasure($data);
+        $meas->Save();
         header("Content-Type: application/json");
         header(http_response_code(200));
         echo json_encode($meas);
+    } catch (CannotWriteOnFileException $e) {
+
+        header("Content-Type: application/json");
+        header(http_response_code(500));
+        echo json_encode(array("message" => $e->getMessage(), "trace" => $e->getTrace()));
+    }
+    // echo var_dump($data);
+});
+route(['POST',], "^/api/measure/test?$", function ($params) {
+    $data = json_decode(file_get_contents("php://input"));
+    try {
+        $meas = Measurement::CreateMeasure($data);
+        header("Content-Type: plain/text");
+        header(http_response_code(200));
+        $meas->Test();
     } catch (CannotWriteOnFileException $e) {
 
         header("Content-Type: application/json");

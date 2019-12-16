@@ -12,7 +12,7 @@
  */
 class Teno
 {
-    public static $FORMATS = array("YmdHis", "Ymd");
+    public static $FORMATS = array("YmdHis", "Ymd", "dmY", "His");
 
     public static $DAYS_SECONDS = 86400;
     public static $HOURS_SECONDS = 3600;
@@ -53,11 +53,26 @@ class Teno
     {
         if (in_array($format, Teno::$FORMATS)) {
             if ($format == "YmdHis")
-                return $this->yyyy . $this->mmmm . $this->dddd . $this->hh . $this->mm . $this->ss;
-            if ($format == "Ymd")
-                return $this->yyyy . $this->mmmm . $this->dddd;
+                return $this->yyyy . "-" . $this->twoDigits($this->mmmm) . "-" . $this->twoDigits($this->dddd) . " " . $this->twoDigits($this->hh) . ":" . $this->twoDigits($this->mm) . ":" . $this->twoDigits($this->ss);
+            else if ($format == "Ymd")
+                return $this->yyyy . "-" . $this->twoDigits($this->mmmm) . "-" . $this->twoDigits($this->dddd);
+            else if ($format == "dmY")
+                return $this->twoDigits($this->dddd) . "-" . $this->twoDigits($this->mmmm) . "-" . $this->yyyy;
+            else if ($format == "His")
+                return $this->twoDigits($this->hh) . ":" . $this->twoDigits($this->mm) . ":" . $this->twoDigits($this->ss);
         }
         return "";
+    }
+    /**
+     *
+     * @param int $number
+     * @return string
+     */
+    private function twoDigits($number)
+    {
+        if ($number < 10)
+            return "0" . $number;
+        return $number;
     }
 
     public function __toString()
