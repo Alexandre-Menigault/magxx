@@ -28,7 +28,7 @@ class IndexMeasurement
         $this->residues = [];
 
         foreach ($r as $_r) {
-            $_pm = new TimedValue($_r->time != "" ? $_r->time : $GLOBALS["DEFAULT_VALUE"], $_r->value != "" ? $_r->value : $GLOBALS["DEFAULT_VALUE"]);
+            $_pm = new TimedValue($_r->time != "" ? $_r->time : DEFAULT_VALUE, $_r->value != "" ? $_r->value : DEFAULT_VALUE);
             array_push($this->residues, $_pm);
         }
 
@@ -51,9 +51,9 @@ class TimedValue
 
     function __construct($t, $v)
     {
-        if ($t == "00:00:00" || $v == $GLOBALS["DEFAULT_VALUE"]) {
+        if ($t == "00:00:00" || $v == DEFAULT_VALUE) {
             $this->time = new Teno(0, 0, 0, 0, 0, 0, 0);
-            $this->value = $GLOBALS["DEFAULT_VALUE"];
+            $this->value = DEFAULT_VALUE;
         } else {
             $HHMMSS = explode(":", $t);
             $this->time = Teno::fromYYYYDDMMHHMMSS(2000, 1, 1, intval($HHMMSS[0]), intval($HHMMSS[1]), intval($HHMMSS[2]));
@@ -101,7 +101,7 @@ class Measurement
         $meas->azimuth_ref = $data->azimuth_ref;
         $meas->pillarMeasurements = [];
         foreach ($data->pillarMeasurements as $pm) {
-            $_pm = new TimedValue($pm->time != "" ? $pm->time : "00:00:00", $pm->value != "" ? $pm->value : $GLOBALS["DEFAULT_VALUE"]);
+            $_pm = new TimedValue($pm->time != "" ? $pm->time : "00:00:00", $pm->value != "" ? $pm->value : DEFAULT_VALUE);
             array_push($meas->pillarMeasurements, $_pm);
         }
         $meas->measurements = [];
@@ -120,7 +120,7 @@ class Measurement
         $process = proc_open(ABS_BINARY_PATH, $descriptorspec, $pipes);
 
         if (is_resource($process)) {
-            $leapsFile = Path::join($GLOBALS["DATABANK_PATH"], 'cfgstore', "leap_second_table.lst");
+            $leapsFile = LEAPS_FILE_PATH;
             $date = str_replace("-", " ", $this->date->format("dmY"));
             $rawPath = $this->GetVariationFilePath();
             $stiv = 5;
@@ -210,7 +210,7 @@ I4
     private function GetVariationFilePath()
     {
         $filename = strtoupper($this->obs) . "" . $this->date->teno . "-raw.csv";
-        return Path::join($GLOBALS["DATABANK_PATH"], "magstore", $this->obs, $this->date->yyyy, "raw", $filename);
+        return Path::join(DATABANK_PATH, "magstore", $this->obs, $this->date->yyyy, "raw", $filename);
     }
 
     public function Save()
@@ -241,8 +241,8 @@ I4
 
         // Add pillar measurement time and values
         foreach ($this->pillarMeasurements as $pm) {
-            $time = $pm->time != "" ? $pm->time->format("His") : $GLOBALS["DEFAULT_VALUE"];
-            $value = $pm->value != "" ? $pm->value : $GLOBALS["DEFAULT_VALUE"];
+            $time = $pm->time != "" ? $pm->time->format("His") : DEFAULT_VALUE;
+            $value = $pm->value != "" ? $pm->value : DEFAULT_VALUE;
             array_push($parts, $time, $value);
         }
         // Add sighting values
@@ -252,21 +252,21 @@ I4
             $this->measurements[0]->sighting[1],
             $this->measurements[0]->sighting[2],
             $this->measurements[0]->sighting[3],
-            $this->measurements[1]->sighting[2] != "" ? $this->measurements[1]->sighting[2] : $GLOBALS["DEFAULT_VALUE"],
-            $this->measurements[1]->sighting[3] != "" ? $this->measurements[1]->sighting[3] : $GLOBALS["DEFAULT_VALUE"],
+            $this->measurements[1]->sighting[2] != "" ? $this->measurements[1]->sighting[2] : DEFAULT_VALUE,
+            $this->measurements[1]->sighting[3] != "" ? $this->measurements[1]->sighting[3] : DEFAULT_VALUE,
         );
         // Add residues time and values of each measure
         foreach ($this->measurements as $meas) {
             array_push($parts, $meas->declinaiton);
             for ($i = 0; $i < 4; $i++) {
-                $time = $meas->residues[$i]->time != "" ? $meas->residues[$i]->time->format("His") : $GLOBALS["DEFAULT_VALUE"];
-                $value = $meas->residues[$i]->value != "" ? $meas->residues[$i]->value : $GLOBALS["DEFAULT_VALUE"];
+                $time = $meas->residues[$i]->time != "" ? $meas->residues[$i]->time->format("His") : DEFAULT_VALUE;
+                $value = $meas->residues[$i]->value != "" ? $meas->residues[$i]->value : DEFAULT_VALUE;
                 array_push($parts, $time, $value);
             }
             array_push($parts, $meas->inclinaiton);
             for ($i = 4; $i < 8; $i++) {
-                $time = $meas->residues[$i]->time != "" ? $meas->residues[$i]->time->format("His") : $GLOBALS["DEFAULT_VALUE"];
-                $value = $meas->residues[$i]->value != "" ? $meas->residues[$i]->value : $GLOBALS["DEFAULT_VALUE"];
+                $time = $meas->residues[$i]->time != "" ? $meas->residues[$i]->time->format("His") : DEFAULT_VALUE;
+                $value = $meas->residues[$i]->value != "" ? $meas->residues[$i]->value : DEFAULT_VALUE;
                 array_push($parts, $time, $value);
             }
         }
@@ -281,6 +281,6 @@ I4
 
     public function getFilepath()
     {
-        return Path::join($GLOBALS["DATABANK_PATH"], File::DATABANK_MAGSTORE_ROOT, $this->obs, $this->date->yyyy, $this->obs . $this->date->yyyy . '.abr');
+        return Path::join(DATABANK_PATH, File::DATABANK_MAGSTORE_ROOT, $this->obs, $this->date->yyyy, $this->obs . $this->date->yyyy . '.abr');
     }
 }

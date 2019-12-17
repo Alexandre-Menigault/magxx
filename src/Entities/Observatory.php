@@ -9,7 +9,7 @@ class Observatory
     {
         try {
             $obs = new Observatory();
-            $obs->config =  json_decode(file_get_contents(Path::join($GLOBALS["OBS_CONFIG_PATH"], $obs_name . ".json")));
+            $obs->config =  json_decode(file_get_contents(Path::join(OBS_CONFIG_PATH, $obs_name . ".json")));
             return $obs;
         } catch (FileNotFoundException $file_exception) {
             error_log("[Observatory.php] Cannot create observatory " . $obs . ": file not found");
@@ -22,7 +22,7 @@ class Observatory
 
     static function ListAllObs()
     {
-        $files = scandir($GLOBALS["OBS_CONFIG_PATH"]);
+        $files = scandir(OBS_CONFIG_PATH);
         $res = array();
         for ($i = 0; $i < count($files); $i++) {
             if (in_array($files[$i], array('..', '.'))) continue; // Ignore .. and . directories

@@ -10,7 +10,8 @@ require_once __DIR__ . '/../src/Entities/Measure.php';
 require_once __DIR__ . '/../src/exceptions/FileNotFoundException.php';
 require_once __DIR__ . '/../src/exceptions/CannotWriteOnFileException.php';
 
-route('GET', '^/$', function () { });
+route('GET', '^/$', function () {
+});
 
 route("GET", '^/api/data/(?<obs>.+)/(?<date>.+)/(?<type>.+)$', function ($params) {
     $interval = isset($_GET["interval"]) ? $_GET["interval"] : "1d";
@@ -213,7 +214,7 @@ route(["GET"], '^/api/file/tree/?$', function ($params) {
     if (!isset($_GET["path"])) $path = Path::join("/");
     else $path = Path::join("/", $_GET["path"]);
 
-    $baseURI = Path::join($GLOBALS["DATABANK_PATH"], "magstore", $path);
+    $baseURI = Path::join(DATABANK_PATH, "magstore", $path);
 
     if (strpos($path, '..') !== false || strpos($path, '../' . DIRECTORY_SEPARATOR) !== false) {
 

@@ -97,7 +97,7 @@ class File
     public function computeFilePath()
     {
         return Path::join(
-            $GLOBALS["DATABANK_PATH"] . self::DATABANK_UPLINK_ROOT,
+            DATABANK_PATH . self::DATABANK_UPLINK_ROOT,
             $this->obs,
             $this->date->yyyy,
             Teno::getFullTime($this->date->mmmm),
@@ -117,7 +117,7 @@ class File
     {
         $teno = Teno::fromYYYYDDMMHHMMSS($this->date->yyyy, $this->date->mmmm, $this->date->dddd, 0, 0, 0);
         return Path::join(
-            $GLOBALS["DATABANK_PATH"] . self::DATABANK_MAGSTORE_ROOT,
+            DATABANK_PATH . self::DATABANK_MAGSTORE_ROOT,
             $this->obs,
             $this->date->yyyy,
             $this->type,
@@ -262,7 +262,7 @@ class File
      */
     public static function getSecondsFilesPathBetweenTwoDates($obsCode, $date1, $date2)
     {
-        $base = Path::join($GLOBALS["DATABANK_PATH"], 'magstore/', $obsCode);
+        $base = Path::join(DATABANK_PATH, 'magstore/', $obsCode);
         $begin = new DateTime($date1);
         $end = new DateTime($date2);
 
