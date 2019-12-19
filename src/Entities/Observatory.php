@@ -4,7 +4,20 @@ require_once __DIR__ . "/../Path.php";
 
 class Observatory
 {
+    /**
+     * The content of the config file
+     *
+     * @var mixed[]
+     */
     public $config;
+    /**
+     * Create a Observatory Object from its config file
+     * @static
+     * @param string $obs_name - The short code of the observatory
+     * @return Observatory
+     * @throws FileNotFoundException
+     * @throws JsonException
+     */
     static function CreateFromConfig($obs_name)
     {
         try {
@@ -20,6 +33,11 @@ class Observatory
         }
     }
 
+    /**
+     * List all the available observatories
+     *
+     * @return string[]
+     */
     static function ListAllObs()
     {
         $files = scandir(OBS_CONFIG_PATH);

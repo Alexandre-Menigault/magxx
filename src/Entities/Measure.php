@@ -120,6 +120,7 @@ class Measurement
         $process = proc_open(ABS_BINARY_PATH, $descriptorspec, $pipes);
 
         if (is_resource($process)) {
+            $observer = $this->observer;
             $leapsFile = LEAPS_FILE_PATH;
             $date = str_replace("-", " ", $this->date->format("dmY"));
             $rawPath = $this->GetVariationFilePath();
@@ -153,7 +154,8 @@ class Measurement
             $i4_time = $this->measurements[0]->residues[7]->time->format("His");
             $i4_val = number_format($this->measurements[0]->residues[7]->value, 4);
 
-            $input = "{$leapsFile}
+            $input = "{$observer}
+{$leapsFile}
 {$date}
 {$id}
 {$rawPath}
@@ -193,8 +195,8 @@ I4
 {$i4_val}
 
 ";
-
-            echo $input;
+            // Debug: send the piped input
+            // echo $input;
 
             fwrite($pipes[0], $input);
             fclose($pipes[0]);
