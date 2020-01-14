@@ -243,6 +243,7 @@ class File
     {
         $linecount = 0;
         $handle = fopen($path, 'r');
+        if (!$handle) return 0;
         while (!feof($handle)) {
             fgets($handle);
             $linecount++;

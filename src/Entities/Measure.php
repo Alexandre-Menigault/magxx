@@ -218,23 +218,7 @@ I4
     public function Save()
     {
         $filepath = $this->getFilepath();
-        if (!file_exists($filepath)) {
 
-            // If file doesn't exists, create it and put headers
-            $headers = [
-                "NB1", "Observer", "Date", "Fp-Fs", "Fabs-Fp",
-                "Heure FP1", "FP1", "Heure FP2", "FP2", "Heure FP3", "FP3", "Heure FP4", "FP4", "Heure FP5", "FP5", "Heure FP6", "FP6",
-                "Azimuth_ref", "V1", "V2", "V3", "V4", "V5", "V6",
-                "PDD1", "Hres1", "res1", "Hres2", "res2", "Hres3", "res3", "Hres4", "res4",
-                "PDI1", "Hres5", "res5", "Hres6", "res6", "Hres7", "res7", "Hres8", "res8",
-                "PDD2", "Hres9", "res9", "Hres10", "res10", "Hres11", "res11", "Hres12", "res12",
-                "PDI2", "Hres13", "res13", "Hres14", "res14", "Hres15", "res15", "Hres16", "res16",
-            ];
-            // If cannot write on file, throw exception
-            if (!file_put_contents($filepath, join(",", $headers) . PHP_EOL)) {
-                throw CannotWriteOnFileException($filepath, "Cannot write headers of new measure");
-            }
-        }
         // Id is number of lines in the file - 1 (remove headers line)
         $this->id = File::countLines($filepath) - 1;
         // Add id, obs, observer and date
@@ -283,6 +267,27 @@ I4
 
     public function getFilepath()
     {
-        return Path::join(DATABANK_PATH, File::DATABANK_MAGSTORE_ROOT, $this->obs, $this->date->yyyy, $this->obs . $this->date->yyyy . '.abr');
+
+        $filepath = Path::join(DATABANK_PATH, File::DATABANK_MAGSTORE_ROOT, $this->obs, $this->date->yyyy, $this->obs . $this->date->yyyy . '.abr');
+
+        // If file doesn't exists, cretae it with a EOL char only
+        if (!file_exists($filepath)) {
+
+            // If file doesn't exists, create it and put headers
+            $headers = [
+                "NB1", "Observer", "Date", "Fp-Fs", "Fabs-Fp",
+                "Heure FP1", "FP1", "Heure FP2", "FP2", "Heure FP3", "FP3", "Heure FP4", "FP4", "Heure FP5", "FP5", "Heure FP6", "FP6",
+                "Azimuth_ref", "V1", "V2", "V3", "V4", "V5", "V6",
+                "PDD1", "Hres1", "res1", "Hres2", "res2", "Hres3", "res3", "Hres4", "res4",
+                "PDI1", "Hres5", "res5", "Hres6", "res6", "Hres7", "res7", "Hres8", "res8",
+                "PDD2", "Hres9", "res9", "Hres10", "res10", "Hres11", "res11", "Hres12", "res12",
+                "PDI2", "Hres13", "res13", "Hres14", "res14", "Hres15", "res15", "Hres16", "res16",
+            ];
+            // If cannot write on file, throw exception
+            if (!file_put_contents($filepath, join(",", $headers) . PHP_EOL)) {
+                throw CannotWriteOnFileException($filepath, "Cannot write headers of new measure");
+            }
+        }
+        return $filepath;
     }
 }
