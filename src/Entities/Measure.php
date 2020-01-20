@@ -257,12 +257,13 @@ I4
             }
         }
         // Write to file and add a new line char
-
+        error_log("Pre save abeolute measurement data");
         if (!file_put_contents($filepath, join(',', $parts) . PHP_EOL, FILE_APPEND)) {
-            throw CannotWriteOnFileException($filepath, "Cannot write content of new measure");
+            throw new CannotWriteOnFileException($filepath, "Cannot write content of new measure");
         }
+        error_log("Saved abeolute measurement data");
 
-        $this->Test();
+        // $this->Test();
     }
 
     public function getFilepath()
