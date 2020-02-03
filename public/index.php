@@ -80,6 +80,14 @@ route(['GET',], "^/api/users/(?<user_login>.+)$", function ($params) {
     header("Content-Type: application/json");
     echo json_encode($user->config);
 });
+route(['GET'], "^/api/measure/?$", function ($params) {
+    $obs = $_GET["obs"];
+    $year = $_GET["year"];
+
+    header("Content-Type: application/json");
+    header(http_response_code(200));
+    echo json_encode(Measurement::GetFinalList($obs, $year));
+});
 route(['POST',], "^/api/measure/?$", function ($params) {
     $data = json_decode(file_get_contents("php://input"));
     try {
@@ -102,7 +110,7 @@ route(['POST',], "^/api/measure/test?$", function ($params) {
         $meas = Measurement::CreateMeasure($data);
         header("Content-Type: plain/text");
         header(http_response_code(200));
-        $meas->Test();
+        echo $meas->Test();
     } catch (CannotWriteOnFileException $e) {
 
         header("Content-Type: application/json");

@@ -125,7 +125,7 @@ class Measurement
             $date = str_replace("-", " ", $this->date->format("dmY"));
             $rawPath = $this->GetVariationFilePath();
             $stiv = 5;
-            $id = File::countLines($this->getFilepath()) - 1;
+            $id = File::countLines($this->getRawFilepath()) - 1;
             $azimuth_ref = number_format($this->azimuth_ref, 4);
             $az1 = number_format($this->measurements[0]->sighting[0], 4);
             $az2 = number_format($this->measurements[0]->sighting[1], 4);
@@ -205,7 +205,7 @@ I4
             fclose($pipes[1]);
             proc_close($process);
 
-            echo $res;
+            return $res;
         }
     }
 
@@ -215,9 +215,42 @@ I4
         return Path::join(DATABANK_PATH, "magstore", $this->obs, $this->date->yyyy, "raw", $filename);
     }
 
+    public static function GetFinalList($observatory, $year)
+    {
+        $filepath = Measurement::getFinalFilepath($observatory, $year);
+        $res = [];
+
+        $handle = fopen($filepath, 'r');
+        if (!$handle) return 0;
+        fgets($handle); // Pass the header line 
+        while (!feof($handle)) {
+            $line = trim(fgets($handle));
+            if ($line == "") break;
+            $data = explode(',', $line);
+            array_push($res, array(
+                "id" => trim($data[0]),
+                "tag" => trim($data[1]),
+                "date" => trim($data[2]),
+                "h0" => trim($data[3]),
+                "d0" => trim($data[4]),
+                "z0" => trim($data[5]),
+                "f0" => trim($data[6]),
+                "tenoD" => trim($data[7]),
+                "D" => trim($data[8]),
+                "tenoI" => trim($data[9]),
+                "I" => trim($data[10]),
+                "tenoF" => trim($data[11]),
+                "F" => trim($data[12]),
+                "observer" => trim($data[13]),
+            ));
+        }
+        fclose($handle);
+        return $res;
+    }
+
     public function Save()
     {
-        $filepath = $this->getFilepath();
+        $filepath = $this->getRawFilepath();
 
         // Id is number of lines in the file - 1 (remove headers line)
         $this->id = File::countLines($filepath) - 1;
@@ -257,16 +290,21 @@ I4
             }
         }
         // Write to file and add a new line char
-        error_log("Pre save abeolute measurement data");
         if (!file_put_contents($filepath, join(',', $parts) . PHP_EOL, FILE_APPEND)) {
             throw new CannotWriteOnFileException($filepath, "Cannot write content of new measure");
         }
-        error_log("Saved abeolute measurement data");
 
-        // $this->Test();
+
+
+        $calc = trim($this->Test());
+        // $calc = str_replace(" ", "", $calc);
+
+        if (!file_put_contents(Measurement::getFinalFilepath($this->obs, $this->date->yyyy), $calc . PHP_EOL, FILE_APPEND)) {
+            throw new CannotWriteOnFileException($filepath, "Cannot write content of new measure");
+        }
     }
 
-    public function getFilepath()
+    public function getRawFilepath()
     {
 
         $filepath = Path::join(DATABANK_PATH, File::DATABANK_MAGSTORE_ROOT, $this->obs, $this->date->yyyy, $this->obs . $this->date->yyyy . '.abr');
@@ -286,7 +324,29 @@ I4
             ];
             // If cannot write on file, throw exception
             if (!file_put_contents($filepath, join(",", $headers) . PHP_EOL)) {
-                throw CannotWriteOnFileException($filepath, "Cannot write headers of new measure");
+                throw new CannotWriteOnFileException($filepath, "Cannot write headers of new raw measure");
+            }
+        }
+        return $filepath;
+    }
+
+    public static function getFinalFilepath($obs, $year)
+    {
+        $filepath = Path::join(DATABANK_PATH, File::DATABANK_MAGSTORE_ROOT, $obs, $year, $obs . "-" . $year . '-abs.csv');
+        if (!file_exists($filepath)) {
+
+            // If file doesn't exists, create it and put headers
+            $headers = [
+                "Id", "Tag", "Date",
+                "H0", "D0", "Z0", "F0",
+                "Teno D", "D",
+                "Teno I", "I",
+                "Teno F", "F",
+                "Observer"
+            ];
+            // If cannot write on file, throw exception
+            if (!file_put_contents($filepath, join(",", $headers) . PHP_EOL)) {
+                throw new CannotWriteOnFileException($filepath, "Cannot write headers of new absolute measure");
             }
         }
         return $filepath;
