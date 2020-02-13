@@ -112,6 +112,23 @@ class Measurement
 
     public function Test()
     {
+        $res = [$this->GetTest1()];
+        if ($this->HasTwoMeasurements())
+            array_push($res, $this->GetTest2());
+        return $res;
+    }
+
+    private function HasTwoMeasurements()
+    {
+        if ($this->measurements[1]->sighting[2] == "" || $this->measurements[1]->sighting[3] == "") {
+            return false;
+        }
+        return true;
+    }
+
+    // Get the second measurement result
+    private function GetTest1()
+    {
         $descriptorspec = array(
             0 => array("pipe", "r"),  // stdin is a pipe that the child will read from
             1 => array("pipe", "w"),  // stdout is a pipe that the child will write to
@@ -207,6 +224,108 @@ I4
 
             return $res;
         }
+        return new Error("Cannot open Absolute Measurement executable");
+    }
+
+    // Get the second measurement result
+    private function GetTest2()
+    {
+        $descriptorspec = array(
+            0 => array("pipe", "r"),  // stdin is a pipe that the child will read from
+            1 => array("pipe", "w"),  // stdout is a pipe that the child will write to
+        );
+
+        $process = proc_open(ABS_BINARY_PATH, $descriptorspec, $pipes);
+
+        if (is_resource($process)) {
+            $observer = $this->observer;
+            $leapsFile = LEAPS_FILE_PATH;
+            $date = str_replace("-", " ", $this->date->format("dmY"));
+            $rawPath = $this->GetVariationFilePath();
+            $stiv = 5;
+            $id = File::countLines($this->getRawFilepath()) - 1;
+            $azimuth_ref = number_format($this->azimuth_ref, 4);
+            $az1 = number_format($this->measurements[1]->sighting[0], 4);
+            $az2 = number_format($this->measurements[1]->sighting[1], 4);
+            $az3 = number_format($this->measurements[1]->sighting[2], 4);
+            $az4 = number_format($this->measurements[1]->sighting[3], 4);
+            $fp_fs = number_format($this->fp_fs, 2);
+            $fabs_fp = number_format($this->fabs_fp, 2);
+
+            $startD = number_format($this->measurements[1]->declinaiton, 4);
+            $d1_time = $this->measurements[1]->residues[0]->time->format("His");
+            $d1_val = number_format($this->measurements[1]->residues[0]->value, 4);
+            $d2_time = $this->measurements[1]->residues[1]->time->format("His");
+            $d2_val = number_format($this->measurements[1]->residues[1]->value, 4);
+            $d3_time = $this->measurements[1]->residues[2]->time->format("His");
+            $d3_val = number_format($this->measurements[1]->residues[2]->value, 4);
+            $d4_time = $this->measurements[1]->residues[3]->time->format("His");
+            $d4_val = number_format($this->measurements[1]->residues[3]->value, 4);
+
+            $startI = number_format($this->measurements[1]->declinaiton, 4);
+            $i1_time = $this->measurements[1]->residues[4]->time->format("His");
+            $i1_val = number_format($this->measurements[1]->residues[4]->value, 4);
+            $i2_time = $this->measurements[1]->residues[5]->time->format("His");
+            $i2_val = number_format($this->measurements[1]->residues[5]->value, 4);
+            $i3_time = $this->measurements[1]->residues[6]->time->format("His");
+            $i3_val = number_format($this->measurements[1]->residues[6]->value, 4);
+            $i4_time = $this->measurements[1]->residues[7]->time->format("His");
+            $i4_val = number_format($this->measurements[1]->residues[7]->value, 4);
+
+            $input = "{$observer}
+{$leapsFile}
+{$date}
+{$id}
+{$rawPath}
+{$stiv}
+{$azimuth_ref}
+{$az1}
+{$az2}
+{$az3}
+{$az4}
+{$fp_fs}
+{$fabs_fp}
+{$startD}
+D1
+{$d1_time}
+{$d1_val}
+D2
+{$d2_time}
+{$d2_val}
+D3
+{$d3_time}
+{$d3_val}
+D4
+{$d4_time}
+{$d4_val}
+{$startI}
+I1
+{$i1_time}
+{$i1_val}
+I2
+{$i2_time}
+{$i2_val}
+I3
+{$i3_time}
+{$i3_val}
+I4
+{$i4_time}
+{$i4_val}
+
+";
+            // Debug: send the piped input
+            // echo $input;
+
+            fwrite($pipes[0], $input);
+            fclose($pipes[0]);
+
+            $res = stream_get_contents($pipes[1]);
+            fclose($pipes[1]);
+            proc_close($process);
+
+            return $res;
+        }
+        return new Error("Cannot open Absolute Measurement executable");
     }
 
     private function GetVariationFilePath()
@@ -295,13 +414,22 @@ I4
         }
 
 
-
-        $calc = trim($this->Test());
-        // $calc = str_replace(" ", "", $calc);
-
-        if (!file_put_contents(Measurement::getFinalFilepath($this->obs, $this->date->yyyy), $calc . PHP_EOL, FILE_APPEND)) {
+        $test1 = trim($this->GetTest1());
+        if (!file_put_contents(Measurement::getFinalFilepath($this->obs, $this->date->yyyy), $test1 . PHP_EOL, FILE_APPEND)) {
             throw new CannotWriteOnFileException($filepath, "Cannot write content of new measure");
         }
+        if ($this->HasTwoMeasurements()) {
+            $test2 = trim($this->GetTest2());
+            if (!file_put_contents(Measurement::getFinalFilepath($this->obs, $this->date->yyyy), $test2 . PHP_EOL, FILE_APPEND)) {
+                throw new CannotWriteOnFileException($filepath, "Cannot write content of new measure");
+            }
+        }
+        // $calc = trim($this->Test());
+        // $calc = str_replace(" ", "", $calc);
+
+        // if (!file_put_contents(Measurement::getFinalFilepath($this->obs, $this->date->yyyy), $calc . PHP_EOL, FILE_APPEND)) {
+        //     throw new CannotWriteOnFileException($filepath, "Cannot write content of new measure");
+        // }
     }
 
     public function getRawFilepath()
