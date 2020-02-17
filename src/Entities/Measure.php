@@ -149,27 +149,27 @@ class Measurement
             $az3 = number_format($this->measurements[0]->sighting[2], 4);
             $az4 = number_format($this->measurements[0]->sighting[3], 4);
             $fp_fs = number_format($this->fp_fs, 2);
-            $fabs_fp = number_format($this->fabs_fp, 2);
+            $fabs_fp = number_format($this->fabs_fp, 1);
 
             $startD = number_format($this->measurements[0]->declinaiton, 4);
             $d1_time = $this->measurements[0]->residues[0]->time->format("His");
-            $d1_val = number_format($this->measurements[0]->residues[0]->value, 4);
+            $d1_val = number_format($this->measurements[0]->residues[0]->value, 1);
             $d2_time = $this->measurements[0]->residues[1]->time->format("His");
-            $d2_val = number_format($this->measurements[0]->residues[1]->value, 4);
+            $d2_val = number_format($this->measurements[0]->residues[1]->value, 1);
             $d3_time = $this->measurements[0]->residues[2]->time->format("His");
-            $d3_val = number_format($this->measurements[0]->residues[2]->value, 4);
+            $d3_val = number_format($this->measurements[0]->residues[2]->value, 1);
             $d4_time = $this->measurements[0]->residues[3]->time->format("His");
-            $d4_val = number_format($this->measurements[0]->residues[3]->value, 4);
+            $d4_val = number_format($this->measurements[0]->residues[3]->value, 1);
 
-            $startI = number_format($this->measurements[0]->declinaiton, 4);
+            $startI = number_format($this->measurements[0]->inclinaiton, 4);
             $i1_time = $this->measurements[0]->residues[4]->time->format("His");
-            $i1_val = number_format($this->measurements[0]->residues[4]->value, 4);
+            $i1_val = number_format($this->measurements[0]->residues[4]->value, 1);
             $i2_time = $this->measurements[0]->residues[5]->time->format("His");
-            $i2_val = number_format($this->measurements[0]->residues[5]->value, 4);
+            $i2_val = number_format($this->measurements[0]->residues[5]->value, 1);
             $i3_time = $this->measurements[0]->residues[6]->time->format("His");
-            $i3_val = number_format($this->measurements[0]->residues[6]->value, 4);
+            $i3_val = number_format($this->measurements[0]->residues[6]->value, 1);
             $i4_time = $this->measurements[0]->residues[7]->time->format("His");
-            $i4_val = number_format($this->measurements[0]->residues[7]->value, 4);
+            $i4_val = number_format($this->measurements[0]->residues[7]->value, 1);
 
             $input = "{$observer}
 {$leapsFile}
@@ -243,7 +243,7 @@ I4
             $date = str_replace("-", " ", $this->date->format("dmY"));
             $rawPath = $this->GetVariationFilePath();
             $stiv = 5;
-            $id = File::countLines($this->getRawFilepath()) - 1;
+            $id = File::countLines($this->getRawFilepath());
             $azimuth_ref = number_format($this->azimuth_ref, 4);
             $az1 = number_format($this->measurements[1]->sighting[0], 4);
             $az2 = number_format($this->measurements[1]->sighting[1], 4);
