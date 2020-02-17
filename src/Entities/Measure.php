@@ -243,7 +243,7 @@ I4
             $date = str_replace("-", " ", $this->date->format("dmY"));
             $rawPath = $this->GetVariationFilePath();
             $stiv = 5;
-            $id = File::countLines(Measurement::getFinalFilepath($this->obs, $this->date->yyyy));
+            $id = File::countLines(Measurement::getFinalFilepath($this->obs, $this->date->yyyy)) - 1;
             $azimuth_ref = number_format($this->azimuth_ref, 4);
             $az1 = number_format($this->measurements[1]->sighting[0], 4);
             $az2 = number_format($this->measurements[1]->sighting[1], 4);
