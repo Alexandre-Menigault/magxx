@@ -9,5 +9,5 @@ SetOutputFilter DEFLATE
 
 <IfModule mod_expires.c>
  ExpiresActive On
- ExpiresByType application/json "access plus 8600 seconds"
+ # ExpiresByType application/json "access plus 8600 seconds"
 </IfModule>

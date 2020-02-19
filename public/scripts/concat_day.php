@@ -48,7 +48,7 @@ while ($cur_teno < $end_teno) {
     $m = Teno::getFullTime($d->mmmm);
     $day = Teno::getFullTime($d->dddd);
     foreach ($types as $type) {
-        $directory = Path::join($GLOBALS["DATABANK_PATH"], '/upstore', $obs, $Y, $m, $day, $type);
+        $directory = Path::join(DATABANK_PATH, '/upstore', $obs, $Y, $m, $day, $type);
         if (!is_dir($directory)) continue;
         var_dump($directory);
         $files = array_filter(scandir($directory), function ($item) {
@@ -57,7 +57,7 @@ while ($cur_teno < $end_teno) {
         // On crée un fichier vide du jour
         // TODO: change format to OBSX-teno-type.csv
         $filename_day = $obs . $d->teno . "-" . $type . ".csv";
-        $end_dir =  Path::join($GLOBALS["DATABANK_PATH"], "/magstore", $obs, $Y, $type);
+        $end_dir =  Path::join(DATABANK_PATH, "/magstore", $obs, $Y, $type);
         if (!file_exists($end_dir)) mkdir($end_dir, 0777, true);
 
         if ($type != "raw") {

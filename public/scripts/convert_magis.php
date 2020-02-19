@@ -6,7 +6,7 @@ include_once "../../src/Teno.php";
 $time = microtime(TRUE);
 $raw_headers = ["t", "ms", "X", "Y", "Z", "F", "flag"];
 
-$directory = Path::join($GLOBALS["DATABANK_PATH"], '/magstore', "CLF5", "2019", "raw");
+$directory = Path::join(DATABANK_PATH, '/magstore', "CLF5", "2019", "raw");
 
 function trim_magis_line($line)
 {

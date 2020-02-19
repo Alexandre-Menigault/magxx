@@ -5,12 +5,28 @@ require_once __DIR__ . "/../Path.php";
 
 class User
 {
+    /**
+     * The content of the config file
+     *
+     * @var mixed[]
+     */
     public $config;
+
+    /**
+     * Creates an User Object from its config file
+     *
+     * @static
+     * @param string $user_login
+     * @return User
+     * 
+     * @throws FileNotFoundException
+     * @throws JsonException
+     */
     static function CreateFromConfig($user_login)
     {
         try {
             $user = new User();
-            $users =  json_decode(file_get_contents($GLOBALS["USERS_PATH"]));
+            $users =  json_decode(file_get_contents(USERS_PATH));
             foreach ($users as $u) {
                 if ($u->login == $user_login) {
                     $user = $u;
@@ -32,9 +48,18 @@ class User
         }
     }
 
+    /**
+     * List all users
+     *
+     * @return array List  of users
+     *      array["name"] string
+     *           ["login"] string
+     *           ["role"] string
+     *  
+     */
     static function ListAllUsers()
     {
-        $users = json_decode(file_get_contents($GLOBALS["USERS_PATH"]));
+        $users = json_decode(file_get_contents(USERS_PATH));
         $res = array();
         for ($i = 0; $i < count($users); $i++) {
             $u = $users[$i];

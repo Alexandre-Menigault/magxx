@@ -6,3 +6,5 @@ todo
 public/log\.txt
 
 phpDocumentor\.phar
+bin/
+config.php
