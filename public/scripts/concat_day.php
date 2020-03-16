@@ -4,95 +4,128 @@ require_once __DIR__ . '/../../config.php';
 require_once __DIR__ . '/../../src/Path.php';
 require_once __DIR__ . '/../../src/Teno.php';
 
-$time_start = microtime(true);
-
-$raw_headers = ["t", "ms", "X", "Y", "Z", "F", "flag"];
-
-$interval = isset($_GET["days"]) ? $_GET["days"] : "1";
-$obs = isset($_GET["obs"]) ? $_GET["obs"] : "CLF3";
-
-echo $obs, PHP_EOL;
-
+echo "============Start Concat==============";
+// Start timer
+$timeStart = microtime(true);
+// Set the variation files header
+const rawHeaders = ["t", "ms", "X", "Y", "Z", "F", "flag"];
+// The files types to concat
+global $fileTypes;
 
 
-// $date = new DateTime("2019-09-17T00:00:00", new DateTimeZone("UTC"));
-$date = new DateTime("now", new DateTimeZone("UTC"));
-// $Y = 2019;
-// $m = 8;
-// $d = 18;
-$Y = intval($date->format("Y"));
-$m = intval($date->format("m"));
-$d = intval($date->format("d"));
-// $end_teno = Teno::fromYYYYDDMMHHMMSS(2019, 8, 19, 0, 0, 0)->teno; // Basically today at 00:00:00
-$end_teno = Teno::fromYYYYDDMMHHMMSS($Y, $m, $d, 0, 0, 0)->teno; // Basically today at 00:00:00
-$cur_teno = $end_teno - intval($interval) * Teno::$DAYS_SECONDS;
-// $date->setTime(0, 0, 0, 0);
-// $date->sub(new DateInterval('P' . $interval . 'D'));
+global $filesCount; // The total file count
+global $daysCount; // The total file count
 
-// $end_date = new DateTime();
-// $end_date->setTime(0, 0, 0, 0);
-// $date->sub(new DateInterval('P0D'));
+define("upstorePath", Path::join(DATABANK_PATH, '/upstore'));
+define("magstorePath", Path::join(DATABANK_PATH, '/magstore'));
 
-$nb_files = 0;
-$day_count = 0;
-$types = ["raw", "env", "log"];
+// Get params
+// $daysToConcat = The number of days to concat from now(excluded)
+//                 If not defined, 1 is default
+// $obs = The observatory set to concat
+//        If not defined, XXX if default
+$daysToConcat = isset($_GET["days"]) ? $_GET["days"] : "1";
+define("obs", isset($_GET["obs"]) ? $_GET["obs"] : "XXX");
 
-// TODO: concat tous les fichiers de tous les observatoires
-// On parcours l'intervale depuis `$date` jusqu'a `$end_date`
+// Get curernt time
+$now = new DateTime("now", new DateTimeZone("UTC"));
+$nowYear = intval($now->format("Y"));
+$nowMonth = intval($now->format("m"));
+$nowDay = intval($now->format("s"));
+// Set the end search to today at 00:00:00 tenoUTC
+$endTeno = Teno::fromYYYYDDMMHHMMSS($nowYear, $nowMonth, $nowDay, 0, 0, 0)->teno;
+// Set the current date to the first day to search at 00:00:00 tenoUTC
+$currentTeno = $endTeno - intval($daysToConcat) * Teno::$DAYS_SECONDS;
 
+$fileTypes =  ["raw", "env", "log"];
+$filesCount = 0;
+$daysCount = 0; // The total days count;
 
-while ($cur_teno < $end_teno) {
-    // On récupère les infos du jour en cours
-    $d = Teno::toUTC($cur_teno);
-    $Y = $d->yyyy;
-    $m = Teno::getFullTime($d->mmmm);
-    $day = Teno::getFullTime($d->dddd);
-    foreach ($types as $type) {
-        $directory = Path::join(DATABANK_PATH, '/upstore', $obs, $Y, $m, $day, $type);
-        if (!is_dir($directory)) continue;
-        var_dump($directory);
-        $files = array_filter(scandir($directory), function ($item) {
-            return $item[0] !== '.'; // Retire les dossiers '.', '..' et les fichers/dossiers cachés
-        });
-        // On crée un fichier vide du jour
-        // TODO: change format to OBSX-teno-type.csv
-        $filename_day = $obs . $d->teno . "-" . $type . ".csv";
-        $end_dir =  Path::join(DATABANK_PATH, "/magstore", $obs, $Y, $type);
-        if (!file_exists($end_dir)) mkdir($end_dir, 0777, true);
+while ($currentTeno < $endTeno) {
 
-        if ($type != "raw") {
-            if ($type != "raw" && file_exists(Path::join($directory, $files[2]))) {
-                copy(Path::join($directory, $files[2]), Path::join($end_dir, $filename_day));
-                $nb_files++;
-            }
-        } else {
-            var_dump(Path::join($end_dir, $filename_day));
-            // if (!file_exists(Path::join($end_dir, $filename_day))) continue;
-            $end_file = fopen(Path::join($end_dir, $filename_day), "w");
-            fwrite($end_file, implode(",", $raw_headers) . PHP_EOL);
-            // On parcours les fichiers du dossier du jour en cours
-            foreach ($files as $file) {
-                // On récupère chaque ligne du fichier 5min en 
-                foreach (read(Path::join($directory, $file)) as $line) {
-                    if (!$end_file) continue;
-                    fputs($end_file, trim($line) . "," . "0" . PHP_EOL);
-                }
-                $nb_files++;
-            }
-        }
-    }
-    $cur_teno += Teno::$DAYS_SECONDS;
-    $day_count++;
+    concatDay($currentTeno);
+
+    $currentTeno += Teno::$DAYS_SECONDS;
+    $daysCount++;
 }
 
-// Mesure du temps écoulé
-$time_end = microtime(true);
-$time = $time_end - $time_start;
+$timeEnd = microtime(true);
+$ellapsedSeconds = ($timeEnd - $timeStart) * 1000;
+$obs = obs;
+echo "
+    
+    Observatory: {$obs}
+    Number of files : {$filesCount}
+    Number of days : {$daysCount}
+    Ellapsed time: {$ellapsedSeconds} ms
+";
 
-echo "Parsed " . $nb_files . " files of " . $day_count . " days in " . $time * 1000 . "ms" . PHP_EOL;
+echo "======================================" . PHP_EOL;
 
+/**
+ * Concat a whole day
+ *
+ * @global $fileTypes
+ * @param int $currentTime
+ * @return void
+ */
+function concatDay($currentTime)
+{
+    global $fileTypes;
+    $curentTeno = Teno::toUTC($currentTime);
+    $year = $curentTeno->yyyy;
+    $month = Teno::getFullTime($curentTeno->mmmm);
+    $day = Teno::getFullTime($curentTeno->dddd);
+    foreach ($fileTypes as $type) {
+        concatType($year, $month, $day, $curentTeno, $type);
+    }
+}
 
-
+/**
+ * Concat all files of a given type
+ *
+ * @global $filesCount
+ * @param int $year
+ * @param int $month
+ * @param int $day
+ * @param Teno $currentTeno
+ * @param string $type
+ * @return void
+ */
+function concatType($year, $month, $day, $currentTeno, $type)
+{
+    global $filesCount;
+    $directory = Path::join(upstorePath, obs, $year, $month, $day, $type);
+    if (!is_dir($directory)) return;
+    $files = array_filter(scandir($directory), function ($item) {
+        return $item[0] !== ".";/* Remove "." and ".." directories form the list*/
+    });
+    $obs = obs;
+    $fixedTeno = $currentTeno->fixedTeno();
+    $todayFilename = "{$obs}-{$fixedTeno}-{$type}.csv";
+    $endDir = Path::join(magstorePath, $obs, $year, $type);
+    // If endDir dont exists, create it and all its previous directories if needed
+    if (!file_exists($endDir))
+        mkdir($endDir, 0777, true);
+    if ($type != "raw") {
+        if (file_exists(Path::join($directory, $files[2]))) {
+            // If not raw files and exists, just copy to the end dir
+            copy(Path::join($directory, $files[2]), Path::join($endDir, $todayFilename));
+            $filesCount++;
+        }
+    } else {
+        // Loop through all raw files and concat enery line into the end file
+        $endFile = fopen(Path::join($endDir, $todayFilename), "w");
+        fwrite($endFile, implode(",", rawHeaders) . PHP_EOL);
+        foreach ($files as $file) {
+            foreach (read(Path::join($directory, $file)) as $line) {
+                if (!$endFile) continue;
+                fputs($endFile, trim($line) . ',' . "0" . PHP_EOL);
+            }
+            $filesCount++;
+        }
+    }
+}
 
 function read($link)
 {

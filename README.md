@@ -44,36 +44,45 @@
         }
 ```
 
-### **GET POST /api/upload-csv**
+### **[GET, POST] /api/upload-csv**
 
-``` txt
-    Uploads a data file to the observatory upstore.
-    The filename must be formated as:
-            // TODO: change format to OBSX-teno-type.csv
-        <OBS><Teno>-<type>.csv
-    Once uploaded the file is named:
-        <OBS>-<Teno>-<type>.csv
+Uploads a data file to the observatory upstore.
 
-    <OBS>      => The observatory short code
-    <Teno>     => The start date where the data should be read (Teno)
-    <type>     => The type of file to get, eg. raw, log, env
+This request must be authentified with Basic authentication
 
-    On success, returns a JSON object
-        {
-            "saved": true,
-            "md5": <hash of the file>,
-            "size": <Size of the file in bytes>,
-            "imported": <the number of lines in the file minus the header>
-        }
+The filename must be formated as:
 
-    On error, returns a JSON object
-        {
-            "saved": false,
-            "error": {
-                "message": <error_message>,
-                "trace": [ <stack_trace_list> ]
-            }
-        }
+`<OBS><Teno>-<type>.csv`
+
+Once uploaded the file is named:
+
+`<OBS>-<Teno>-<type>.csv`
+
+* `<OBS>`      => The observatory short code
+* `<Teno>`     => The start date where the data should be read (Teno)
+* `<type>`     => The type of file to get, eg. raw, log, env
+
+On success, returns a JSON object
+
+``` json
+{
+    "saved": true,
+    "md5": "hash_of_the_file",
+    "size": "Size_of_the_file_in_bytes",
+    "imported": "the_number_of_lines_in_the_file_minus_the_header"
+}
+```
+
+On error, returns a JSON object
+
+``` json
+{
+    "saved": false,
+    "error": {
+        "message": <error_message>,
+        "trace": [ <stack_trace_list> ]
+    }
+}
 ```
 
 ### **GET /api/observatories**

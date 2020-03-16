@@ -63,12 +63,15 @@ class User
         $res = array();
         for ($i = 0; $i < count($users); $i++) {
             $u = $users[$i];
-            $user = array(
-                "name" => $u->name,
-                "login" => $u->login,
-                "role" => $u->role,
-            );
-            array_push($res, $user);
+            // Remove the uploader role from the list of users
+            if ($u->role != "uploader") {
+                $user = array(
+                    "name" => $u->name,
+                    "login" => $u->login,
+                    "role" => $u->role,
+                );
+                array_push($res, $user);
+            }
         }
         return $res;
     }

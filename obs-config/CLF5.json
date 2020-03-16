@@ -14,7 +14,8 @@
     "theodolite_graduation": "grade",
     "fa-fm": -0.57,
     "nb_obs": 1500,
-    "noise_V": "0.0 0.0 0.0 0.0",
-    "noise_Va": "0.0 0.0 0.0",
-    "search_interval": 5
+    "noise_V": "0.2 0.2 0.2 0.12",
+    "noise_Va": "5.0e-3 2.5e-3 0.5",
+    "search_interval": 5.0,
+    "max_observations": 2000
 }

@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../src/functions.php';
+require_once __DIR__ . '/../src/authenticate.php';
 require_once __DIR__ . '/../src/Entities/File.php';
 require_once __DIR__ . '/../src/Teno.php';
 require_once __DIR__ . '/../src/Upload.php';
@@ -45,6 +46,8 @@ route("GET", '^/api/data/(?<obs>.+)/(?<date>.+)/(?<type>.+)$', function ($params
 });
 
 route(['GET', 'POST'], "^/api/upload-csv$", function ($params) {
+    // If the user failed to authenticate, this function will cause the rest of the upload function not to be executed
+    authenticate();
     $res = Upload::uploader();
     $log = fopen("log.txt", "w");
     fwrite($log, print_r($_FILES, true));

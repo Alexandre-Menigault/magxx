@@ -75,6 +75,23 @@ class Teno
         return $number;
     }
 
+    private function getZeros($len)
+    {
+        $res = "";
+        for ($i = 0; $i < $len; $i++) {
+            $res = $res . "0";
+        }
+        return $res;
+    }
+
+    public function fixedTeno()
+    {
+
+        $tenoLen = strlen(intval($this->teno));
+        $zerosToAdd = 10 - $tenoLen;
+        return $this->getZeros($zerosToAdd) . $this->teno;
+    }
+
     public function __toString()
     {
 
@@ -92,6 +109,7 @@ class Teno
         $d = DateTime::createFromFormat("YmdHis", $this->yyyy . $mmmm . $dddd  . $hh . $mm . $ss, new DateTimeZone("UTC"));
         return $d == false || $now->getTimestamp() > $d->getTimestamp();
     }
+
 
     /**
      * Get the 2 digit value of a time (month, day, hour, minute, second)

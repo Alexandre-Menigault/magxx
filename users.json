@@ -10,5 +10,11 @@
         "login": "ben",
         "passwd": "",
         "role": "admin"
+    },
+    {
+        "name": "Uploader",
+        "login": "uploader",
+        "passwd": "$this_isAPaSswoRd",
+        "role": "uploader"
     }
 ]
