@@ -11,3 +11,8 @@ SetOutputFilter DEFLATE
  ExpiresActive On
  # ExpiresByType application/json "access plus 8600 seconds"
 </IfModule>
+
+AuthName "Please authentify to the magproc app"
+AuthType Basic
+AuthUserFile c:\xampp\htdocs\Observatoire\.htpasswd
+require valid-user
