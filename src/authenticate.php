@@ -1,6 +1,6 @@
 <?php
 
-include_once __DIR__ . "./Path.php";
+include_once __DIR__ . "/Path.php";
 
 function _isUserValid($user, $pass, $users)
 {
