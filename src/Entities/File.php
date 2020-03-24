@@ -197,7 +197,8 @@ class File
             $y = floatval($r[3]);
             $z = floatval($r[4]);
             $F = floatval($r[5]);
-            $Fv = sqrt($x * $x + $y * $y + $z * $z);
+            if($F >= 99999 || $x >= 99999 || $y >= 99999 || $z >= 99999) $Fv = 99999;
+            else $Fv = sqrt($x * $x + $y * $y + $z * $z);
             return array(
                 "t" => $r[0],
                 "ms" => $r[1],
