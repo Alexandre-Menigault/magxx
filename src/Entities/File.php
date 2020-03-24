@@ -206,7 +206,7 @@ class File
                 "Y" => $r[3],
                 "Z" => $r[4],
                 "F" => $r[5],
-                "Fs-Fv" => "" . $F - $Fv . "",
+                "Fs-Fv" => "" . $Fv >= 99999 ? 99999 : ($F - $Fv) . "",
             );
         } else if ($this->type == self::TYPE_ENV) {
             return array(
