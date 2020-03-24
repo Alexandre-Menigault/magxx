@@ -31,7 +31,7 @@ define("obs", isset($_GET["obs"]) ? $_GET["obs"] : "XXX");
 $now = new DateTime("now", new DateTimeZone("UTC"));
 $nowYear = intval($now->format("Y"));
 $nowMonth = intval($now->format("m"));
-$nowDay = intval($now->format("s"));
+$nowDay = intval($now->format("d"));
 // Set the end search to today at 00:00:00 tenoUTC
 $endTeno = Teno::fromYYYYDDMMHHMMSS($nowYear, $nowMonth, $nowDay, 0, 0, 0)->teno;
 // Set the current date to the first day to search at 00:00:00 tenoUTC
@@ -101,8 +101,8 @@ function concatType($year, $month, $day, $currentTeno, $type)
         return $item[0] !== ".";/* Remove "." and ".." directories form the list*/
     });
     $obs = obs;
-    $fixedTeno = $currentTeno->fixedTeno();
-    $todayFilename = "{$obs}-{$fixedTeno}-{$type}.csv";
+    $fixedTeno = $currentTeno->teno();
+    $todayFilename = "{$obs}{$fixedTeno}-{$type}.csv";
     $endDir = Path::join(magstorePath, $obs, $year, $type);
     // If endDir dont exists, create it and all its previous directories if needed
     if (!file_exists($endDir))
