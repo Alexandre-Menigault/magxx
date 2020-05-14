@@ -122,7 +122,7 @@ class File
             $this->date->yyyy,
             $this->type,
             // TODO: change format to OBSX-teno-type.csv
-            $this->obs . $teno->teno . "-" . $this->type . ".csv"
+            $this->obs . "-" . $teno->teno . "-" . $this->type . ".csv"
         );
     }
 

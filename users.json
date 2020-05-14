@@ -14,7 +14,7 @@
     {
         "name": "Uploader",
         "login": "uploader",
-        "passwd": "$this_isAPaSswoRd",
+        "passwd": "uploader",
         "role": "uploader"
     }
 ]

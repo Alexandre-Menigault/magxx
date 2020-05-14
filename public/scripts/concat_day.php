@@ -101,8 +101,8 @@ function concatType($year, $month, $day, $currentTeno, $type)
         return $item[0] !== ".";/* Remove "." and ".." directories form the list*/
     });
     $obs = obs;
-    $fixedTeno = $currentTeno->teno;
-    $todayFilename = "{$obs}{$fixedTeno}-{$type}.csv";
+    $fixedTeno = $currentTeno->fixedTeno();
+    $todayFilename = "{$obs}-{$fixedTeno}-{$type}.csv";
     $endDir = Path::join(magstorePath, $obs, $year, $type);
     // If endDir dont exists, create it and all its previous directories if needed
     if (!file_exists($endDir))

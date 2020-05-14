@@ -14,5 +14,5 @@ SetOutputFilter DEFLATE
 
 AuthName "Please authentify to the magproc app"
 AuthType Basic
-AuthUserFile c:\xampp\htdocs\Observatoire\.htpasswd
+AuthUserFile C:\Users\user\AppData\Local\xampp\htdocs\.htpasswd
 require valid-user

@@ -220,6 +220,18 @@ class Teno
             } else
                 break;
         }
+
+        // C'est une rustine, ça fonctionne bien avec ça
+        if (Teno::isLeapYear($year)) {
+            if (($monthCounter == 2 && $remainingDays + 1 == 30)) {
+                return array("mmmm" => 3, "dddd" => 0);
+            } else if (($monthCounter == 1 && $remainingDays + 1 == 32)) {
+                return array("mmmm" => 2, "dddd" => 1);
+            } else if ($monthCounter >= 3) {
+                return array("mmmm" => $monthCounter, "dddd" => $remainingDays);
+            }
+        }
+
         return array("mmmm" => $monthCounter, "dddd" => $remainingDays + 1);
     }
 
