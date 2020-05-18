@@ -103,7 +103,7 @@ class File
             Teno::getFullTime($this->date->mmmm),
             Teno::getFullTime($this->date->dddd),
             $this->type,
-            $this->obs . "-" . $this->date->teno . "." . $this->type . ".csv"
+            $this->obs . "-" . $this->date->fixedTeno() . "." . $this->type . ".csv"
         );
     }
 
