@@ -122,7 +122,7 @@ class File
             $this->date->yyyy,
             $this->type,
             // TODO: change format to OBSX-teno-type.csv
-            $this->obs . "-" . $teno->teno . "-" . $this->type . ".csv"
+            $this->obs . "-" . $teno->fixedTeno() . "-" . $this->type . ".csv"
         );
     }
 
@@ -197,7 +197,7 @@ class File
             $y = floatval($r[3]);
             $z = floatval($r[4]);
             $F = floatval($r[5]);
-            if($F >= 99999 || $x >= 99999 || $y >= 99999 || $z >= 99999) $Fv = 99999;
+            if ($F >= 99999 || $x >= 99999 || $y >= 99999 || $z >= 99999) $Fv = 99999;
             else $Fv = sqrt($x * $x + $y * $y + $z * $z);
             return array(
                 "t" => $r[0],
@@ -272,6 +272,28 @@ class File
             $filename = $obsCode . $i->format("Ymd"); // = FileFormat
             // TODO: change format to OBSX-teno-type.csv
             $file = Path::join($base, $i->format('Y'), "raw", $filename . "-raw.csv");
+            if (is_file($file)) {
+                yield $file;
+            }
+        }
+    }
+
+    /**
+     * Get the absolute path for every raw file of a observatory between two dates
+     * File format -> [ObsCode]-[teno 10 digits]-raw.csv
+     *
+     * @param string $obsCode
+     * @param Teno $tenoStart
+     * @param Teno $tenoEnd
+     * @return Generator|string[] 
+     */
+    public static function getRawFilesBetweenDates($obsCode, $tenoStart, $tenoEnd)
+    {
+        $base = Path::join(DATABANK_PATH, 'magstore/', $obsCode);
+        /** @var Teno $current */
+        for ($current = $tenoStart->teno; $current <= $tenoEnd->teno; $current = Teno::toUTC($current->teno + 86400)) {
+            $filename = "${$obsCode}-{$current->teno}-raw.csv";
+            $file = Path::join($base, $current->yyyy, 'raw', $filename);
             if (is_file($file)) {
                 yield $file;
             }
