@@ -241,9 +241,9 @@ class Teno
                     $remainingDays -= $daysInMonth[$monthCounter - 1] + 1;
                     $monthCounter++;
                 } else if ($teno < $feb29["start"]) {
-                    if ($remainingDays += 1 > $daysInMonth[$monthCounter - 1]) {
+                    if ($remainingDays + 1 > $daysInMonth[$monthCounter - 1]) {
                         $remainingDays -= $daysInMonth[$monthCounter - 1];
-                        $$monthCounter++;
+                        $monthCounter++;
                     }
                 }
             }
@@ -357,11 +357,11 @@ class Teno
         $ndb = $nd - $nb;
 
         $doyb = $ndb % 365;
-        $yyyy = 2000 + ($ndb - $doyb) / 365;
+        $yyyy = 2000 + floor(($ndb - $doyb)) / 365;
         $_md = Teno::getMonthNumberAndDayOfMonth($yyyy, $doyb, $teno);
         $mmmm = $_md["mmmm"];
         $dddd = $_md["dddd"];
-        if (Teno::isLeapYear($yyyy) && $mmmm >= 3) $dddd++;
+        // if (Teno::isLeapYear($yyyy) && $mmmm >= 3) $dddd++;
 
         if (Teno::isLeap($teno)) {
 
