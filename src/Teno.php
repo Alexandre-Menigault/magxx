@@ -236,9 +236,9 @@ class Teno
         if (Teno::isLeapYear($year)) {
             $feb29 = Teno::_get29FebOfYear($year);
             if ($teno >= $feb29["end"]) {
-                $remainingDays += 2;
-                if ($remainingDays > $daysInMonth[$monthCounter - 1]) {
-                    $remainingDays -= $daysInMonth[$monthCounter - 1] + 1;
+                $remainingDays += 1;
+                if ($remainingDays >= $daysInMonth[$monthCounter - 1]) {
+                    $remainingDays -= $daysInMonth[$monthCounter - 1];
                     $monthCounter++;
                 } else if ($teno < $feb29["start"]) {
                     if ($remainingDays + 1 > $daysInMonth[$monthCounter - 1]) {
