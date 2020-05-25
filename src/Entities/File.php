@@ -300,6 +300,22 @@ class File
         }
     }
 
+    public static function getRawFilesBetweenDatesInFile($inFilePath, $obsCode, $tenoStart, $tenoEnd)
+    {
+        $output = "";
+        $base = Path::join(DATABANK_PATH, 'magstore/', $obsCode);
+        /** @var Teno $current */
+        for ($current = $tenoStart->teno; $current <= $tenoEnd->teno; $current = Teno::toUTC($current->teno + 86400)) {
+            $filename = "${$obsCode}-{$current->teno}-raw.csv";
+            $file = Path::join($base, $current->yyyy, 'raw', $filename);
+            if (is_file($file)) {
+                $output .= $file . PHP_EOL;
+            }
+        }
+
+        $file = file_put_contents($inFilePath, $output);
+    }
+
     /**
      * Return an array of sampled seconds data
      * Each value in array is mean of all points within samplerate range

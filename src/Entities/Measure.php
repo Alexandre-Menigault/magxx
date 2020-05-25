@@ -479,4 +479,22 @@ I4
         }
         return $filepath;
     }
+
+    /**
+     * Get the filepath of abs data for a Observatory this particular year
+     * Without setting headers if empty
+     * @param string $obs
+     * @param int $year
+     * 
+     * @throws FileNotFoundException
+     * @return string
+     */
+    public static function getFinalFilepathWithoutChecking($obs, $year)
+    {
+        $filepath = Path::join(DATABANK_PATH, File::DATABANK_MAGSTORE_ROOT, $obs, $year, $obs . "-" . $year . '-abs.csv');
+        if (!file_exists($filepath)) {
+            throw new FileNotFoundException($filepath);
+        }
+        return $filepath;
+    }
 }
