@@ -330,7 +330,7 @@ I4
 
     private function GetVariationFilePath()
     {
-        $filename = strtoupper($this->obs) . "" . $this->date->teno . "-raw.csv";
+        $filename = strtoupper($this->obs) . "-" . $this->date->fixedTeno() . "-raw.csv";
         return Path::join(DATABANK_PATH, "magstore", $this->obs, $this->date->yyyy, "raw", $filename);
     }
 
