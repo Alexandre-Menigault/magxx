@@ -305,8 +305,9 @@ class File
         $output = "";
         $base = Path::join(DATABANK_PATH, 'magstore/', $obsCode);
         /** @var Teno $current */
-        for ($current = $tenoStart->teno; $current <= $tenoEnd->teno; $current = Teno::toUTC($current->teno + 86400)) {
-            $filename = "${$obsCode}-{$current->teno}-raw.csv";
+        for ($current = $tenoStart; $current->teno <= $tenoEnd->teno; $current = Teno::toUTC($current->teno + 86400)) {
+            echo $current;
+            $filename = "{$obsCode}-{$current->fixedTeno()}-raw.csv";
             $file = Path::join($base, $current->yyyy, 'raw', $filename);
             if (is_file($file)) {
                 $output .= $file . PHP_EOL;

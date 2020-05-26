@@ -8,6 +8,7 @@ require_once __DIR__ . '/../src/Upload.php';
 require_once __DIR__ . '/../src/Entities/Observatory.php';
 require_once __DIR__ . '/../src/Entities/User.php';
 require_once __DIR__ . '/../src/Entities/Measure.php';
+require_once __DIR__ . '/../src/Entities/Baseline.php';
 require_once __DIR__ . '/../src/exceptions/FileNotFoundException.php';
 require_once __DIR__ . '/../src/exceptions/CannotWriteOnFileException.php';
 
@@ -111,9 +112,25 @@ route(['POST',], "^/api/measure/test?$", function ($params) {
     $data = json_decode(file_get_contents("php://input"));
     try {
         $meas = Measurement::CreateMeasure($data);
-        header("Content-Type: application/json");
+        // header("Content-Type: application/json");
         header(http_response_code(200));
         echo json_encode($meas->Test());
+    } catch (CannotWriteOnFileException $e) {
+
+        header("Content-Type: application/json");
+        header(http_response_code(500));
+        echo json_encode(array("message" => $e->getMessage(), "trace" => $e->getTrace()));
+    }
+    // echo var_dump($data);
+});
+
+route(['POST',], "^/api/baseline/test?$", function ($params) {
+    $data = json_decode(file_get_contents("php://input"));
+    try {
+        $baseline = new Baseline($data);
+        header("Content-Type: application/json");
+        header(http_response_code(200));
+        $baseline->Compute();
     } catch (CannotWriteOnFileException $e) {
 
         header("Content-Type: application/json");
