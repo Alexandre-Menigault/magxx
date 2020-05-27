@@ -112,7 +112,7 @@ route(['POST',], "^/api/measure/test?$", function ($params) {
     $data = json_decode(file_get_contents("php://input"));
     try {
         $meas = Measurement::CreateMeasure($data);
-        // header("Content-Type: application/json");
+        header("Content-Type: application/json");
         header(http_response_code(200));
         echo json_encode($meas->Test());
     } catch (CannotWriteOnFileException $e) {
