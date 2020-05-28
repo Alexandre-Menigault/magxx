@@ -99,6 +99,7 @@ class Baseline
 
         $baseDir = $this->getBaseDirOrCreate();
         $tempDir = Path::join($baseDir, 'Temp', "");
+        mkdir($tempDir, 0777, true);
         $outputBlvFile = Path::join($baseDir, $this->observatory . ".blv");
         $outputWeightFile = Path::join($baseDir, "weights.out");
         $outputHDZFFile = Path::join($baseDir, "HDZF.blv");
