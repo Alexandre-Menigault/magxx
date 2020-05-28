@@ -167,7 +167,7 @@ C
         $descriptorspec = array(
             0 => array("pipe", "r"),  // stdin is a pipe that the child will read from
             1 => array("file", Path::join($baseDir, "screen.out"), "a"),  // stdout is a pipe that the child will write to
-            1 => array("file", Path::join($baseDir, "screen.err"), "a"),  // stdout is a pipe that the child will write to
+            2 => array("file", Path::join($baseDir, "screen.err"), "a"),  // stdout is a pipe that the child will write to
         );
 
         $process = proc_open(BSL_BINARY_PATH, $descriptorspec, $pipes);
@@ -188,9 +188,16 @@ C
             mkdir($baseBlvDir, 0777, true);
         }
         $dirFiles = array_diff(scandir($baseBlvDir, SCANDIR_SORT_DESCENDING), array('.', '..'));
-        $id = intval($dirFiles[0]) + 1;
+        $id = $this->twoDigits(intval($dirFiles[0]) + 1);
         $endpath = Path::join($baseBlvDir, $id);
         mkdir($endpath, 0777, true);
         return $endpath;
+    }
+
+    private function twoDigits($number)
+    {
+        if ($number < 10)
+            return "0" . $number;
+        return $number;
     }
 }
