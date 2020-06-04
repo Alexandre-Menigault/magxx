@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../src/Utils.php';
 require_once __DIR__ . '/../src/functions.php';
 require_once __DIR__ . '/../src/authenticate.php';
 require_once __DIR__ . '/../src/Entities/File.php';
@@ -130,7 +131,8 @@ route(['POST',], "^/api/baseline/test?$", function ($params) {
         $baseline = new Baseline($data);
         header("Content-Type: application/json");
         header(http_response_code(200));
-        $baseline->Compute();
+        $hdzfPath = $baseline->Compute();
+        $baseline->sendHDZF($hdzfPath);
     } catch (CannotWriteOnFileException $e) {
 
         header("Content-Type: application/json");

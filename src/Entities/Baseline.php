@@ -4,6 +4,7 @@
 // require_once __DIR__ . "/../File.php";
 // require_once __DIR__ . "/Measure.php";
 // require_once __DIR__ . "/../../config.php";
+require_once __DIR__ . "/../Utils.php";
 
 class Baseline
 {
@@ -164,11 +165,11 @@ class Baseline
 {$tempDir}
 C
 ";
-        echo $input;
+        // echo $input;
         $descriptorspec = array(
             0 => array("pipe", "r"),  // stdin is a pipe that the child will read from
-            1 => array("file", Path::join($baseDir, "screen.out"), "a"),  // stdout is a pipe that the child will write to
-            2 => array("file", Path::join($baseDir, "screen.err"), "a"),  // stdout is a pipe that the child will write to
+            1 => array("file", Path::join($tempDir, "screen.out"), "a"),  // stdout is a pipe that the child will write to
+            2 => array("file", Path::join($tempDir, "screen.err"), "a"),  // stdout is a pipe that the child will write to
         );
 
         $process = proc_open(BSL_BINARY_PATH, $descriptorspec, $pipes);
@@ -178,6 +179,7 @@ C
 
             proc_close($process);
         }
+        return $outputHDZFFile;
     }
 
     private function getBaseDirOrCreate()
@@ -193,6 +195,11 @@ C
         $endpath = Path::join($baseBlvDir, $id);
         mkdir($endpath, 0777, true);
         return $endpath;
+    }
+
+    public function sendHDZF($filePath)
+    {
+        echo Utils::HDZF_TO_CSV(file_get_contents($filePath));
     }
 
     private function twoDigits($number)
