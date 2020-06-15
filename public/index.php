@@ -65,11 +65,15 @@ route(['GET',], "^/api/observatories/?$", function ($params) {
     header("Content-Type: application/json");
     echo json_encode($obs);
 });
+
+/**
+ * Get the last config for this observatory
+ */
 route(['GET',], "^/api/observatory/(?<obs>.+)$", function ($params) {
     $obs = Observatory::CreateFromConfig($params["obs"]);
 
     header("Content-Type: application/json");
-    echo json_encode($obs->config);
+    echo json_encode($obs->config[count($obs->config) - 1]);
 });
 
 // Routes for Users
@@ -125,7 +129,7 @@ route(['POST',], "^/api/measure/test?$", function ($params) {
     // echo var_dump($data);
 });
 
-route(['POST',], "^/api/baseline/test?$", function ($params) {
+route(['POST',], "^/api/baseline/?$", function ($params) {
     $data = json_decode(file_get_contents("php://input"));
     try {
         $baseline = new Baseline($data);
@@ -133,11 +137,37 @@ route(['POST',], "^/api/baseline/test?$", function ($params) {
         header(http_response_code(200));
         $hdzfPath = $baseline->Compute();
         $baseline->sendHDZF($hdzfPath);
-    } catch (CannotWriteOnFileException $e) {
+        //TODO: Envoyer les mesure absolues de cette période avec
+    } catch (Exception $e) {
 
         header("Content-Type: application/json");
         header(http_response_code(500));
         echo json_encode(array("message" => $e->getMessage(), "trace" => $e->getTrace()));
+    }
+    // echo var_dump($data);
+});
+
+route(['GET',], "^/api/baseline/screen?$", function ($params) {
+    $data = json_decode(file_get_contents("php://input"));
+    header("Content-Disposition: inline");
+    try {
+
+        if (!isset($_GET["obs"]) || !isset($_GET["startTeno"]) || !isset($_GET["endTeno"])) {
+            header("Content-Type: plain/text");
+            header(http_response_code(400));
+            echo "The request is malformed, observatory or interval is not set";
+        }
+        header("Content-Type: plain/text");
+        header(http_response_code(200));
+        $obs = $_GET["obs"];
+        $startTeno = Teno::toUTC(intval($_GET["startTeno"]));
+        $endTeno = Teno::toUTC(intval($_GET["endTeno"]));
+        echo Baseline::getLastScreenOut($obs, $startTeno, $endTeno);
+    } catch (Exception $e) {
+
+        header("Content-Type: plain/text");
+        header(http_response_code(500));
+        echo $e->getMessage();
     }
     // echo var_dump($data);
 });

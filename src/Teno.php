@@ -393,6 +393,21 @@ class Teno
         return new Teno($total, $yyyy, $mmmm, $dddd, $hh, $mm, $ss);
     }
 
+    public static function fromHumanReadable($dateString)
+    {
+        $exploded = explode(" ", $dateString);
+        $date = explode("-", $exploded[0]);
+        $time = explode(":", $exploded[1]);
+        return Teno::fromYYYYDDMMHHMMSS(
+            $date[0],
+            $date[1],
+            $date[2],
+            $time[0],
+            $time[1],
+            $time[2],
+        );
+    }
+
     /**
      * Get Teno object from Timestamp (including milliseconds)
      * @param int $timestamp
