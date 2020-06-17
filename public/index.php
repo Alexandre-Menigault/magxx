@@ -156,6 +156,7 @@ route(['GET',], "^/api/baseline/screen?$", function ($params) {
             header("Content-Type: plain/text");
             header(http_response_code(400));
             echo "The request is malformed, observatory or interval is not set";
+            return;
         }
         header("Content-Type: plain/text");
         header(http_response_code(200));
@@ -170,6 +171,35 @@ route(['GET',], "^/api/baseline/screen?$", function ($params) {
         echo $e->getMessage();
     }
     // echo var_dump($data);
+});
+
+route(['GET'], '^/api/baseline/intervals/?$', function ($params) {
+    if (!isset($_GET["obs"]) || !isset($_GET["year"])) {
+        header("Content-Type: plain/text");
+        header(http_response_code(400));
+        echo "The request is malformed, observatory or year is not set";
+        return;
+    }
+    $year = intval($_GET["year"]);
+    $obs = $_GET["obs"];
+    header("Content-Type: application/json");
+    header(http_response_code(200));
+    echo json_encode(Baseline::getIntervalsForYear($obs, $year));
+});
+
+route(['GET'], '^/api/baseline/interval-trys/?$', function ($params) {
+    if (!isset($_GET["obs"]) || !isset($_GET["year"]) || !isset($_GET["intervalString"])) {
+        header("Content-Type: plain/text");
+        header(http_response_code(400));
+        echo "The request is malformed, observatory, year, intervalString is not set";
+        return;
+    }
+    $year = intval($_GET["year"]);
+    $obs = $_GET["obs"];
+    $intervalString = $_GET["intervalString"];
+    header("Content-Type: application/json");
+    header(http_response_code(200));
+    echo json_encode(Baseline::getIntervalsTrysForYear($obs, $year, $intervalString));
 });
 
 route(['GET'], '^/api/files/seconds/?$', function ($params) {

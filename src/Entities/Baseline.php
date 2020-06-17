@@ -281,6 +281,35 @@ C
         return file_get_contents($screenOutFilePath);
     }
 
+    /**
+     * Get the list of baseline intervals for this year of the observatory
+     *
+     * @param string $obs
+     * @param int $year
+     * @return string[]
+     */
+    public static function getIntervalsForYear($obs, $year)
+    {
+        $baseBlvDir = Path::join(DATABANK_PATH, "magstore", $obs, $year, "baseline");
+        if (!is_dir($baseBlvDir)) return [];
+        return array_diff(scandir($baseBlvDir, SCANDIR_SORT_DESCENDING), array('.', '..'));
+    }
+
+    /**
+     * Get the list of baseline intervals trys for this interval this year of the observatory
+     *
+     * @param string $obs
+     * @param int $year
+     * @param string $intervalString
+     * @return string[]
+     */
+    public static function getIntervalsTrysForYear($obs, $year, $intervalString)
+    {
+        $baseBlvDir = Path::join(DATABANK_PATH, "magstore", $obs, $year, "baseline", $intervalString);
+        if (!is_dir($baseBlvDir)) return [];
+        return array_diff(scandir($baseBlvDir, SCANDIR_SORT_DESCENDING), array('.', '..'));
+    }
+
     public function SaveInputLocal($baseBlvDir, $input)
     {
         file_put_contents(Path::join($baseBlvDir, "input.dat"), $input);
