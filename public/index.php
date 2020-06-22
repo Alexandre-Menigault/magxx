@@ -10,6 +10,7 @@ require_once __DIR__ . '/../src/Entities/Observatory.php';
 require_once __DIR__ . '/../src/Entities/User.php';
 require_once __DIR__ . '/../src/Entities/Measure.php';
 require_once __DIR__ . '/../src/Entities/Baseline.php';
+require_once __DIR__ . '/../src/Entities/Definitive.php';
 require_once __DIR__ . '/../src/exceptions/FileNotFoundException.php';
 require_once __DIR__ . '/../src/exceptions/CannotWriteOnFileException.php';
 
@@ -200,6 +201,22 @@ route(['GET'], '^/api/baseline/interval-trys/?$', function ($params) {
     header("Content-Type: application/json");
     header(http_response_code(200));
     echo json_encode(Baseline::getIntervalsTrysForYear($obs, $year, $intervalString));
+});
+
+route(['GET'], '^/api/baseline/try-config/?$', function ($params) {
+    if (!isset($_GET["obs"]) || !isset($_GET["year"]) || !isset($_GET["intervalString"]) || !isset($_GET["try"])) {
+        header("Content-Type: plain/text");
+        header(http_response_code(400));
+        echo "The request is malformed, observatory, year, intervalString is not set";
+        return;
+    }
+    $year = intval($_GET["year"]);
+    $obs = $_GET["obs"];
+    $intervalString = $_GET["intervalString"];
+    $try = $_GET["try"];
+    header("Content-Type: application/json");
+    header(http_response_code(200));
+    echo json_encode(Baseline::getTryConfigWithObsConf($obs, $year, $intervalString, $try));
 });
 
 route(['GET'], '^/api/files/seconds/?$', function ($params) {

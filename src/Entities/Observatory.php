@@ -13,6 +13,12 @@ class Observatory
 
     public $lastBaselineConfig;
 
+
+    public function getLastConfig()
+    {
+        return $this->config[count($this->config) - 1];
+    }
+
     /**
      * Create a Observatory Object from its config file
      * @static

@@ -310,6 +310,29 @@ C
         return array_diff(scandir($baseBlvDir, SCANDIR_SORT_DESCENDING), array('.', '..'));
     }
 
+
+    /**
+     * Get the try config with the Obs config 
+     *
+     * @param string $obs
+     * @param int $year
+     * @param string $intervalString
+     * @param string $try
+     * @return array
+     */
+    public static function getTryConfigWithObsConf($obs, $year, $intervalString, $try)
+    {
+
+        $baseBlvDir = Path::join(DATABANK_PATH, "magstore", $obs, $year, "baseline", $intervalString, $try);
+        if (!is_dir($baseBlvDir)) throw new Exception("Try not exists");
+
+        $tryConfigFilePath = Path::join($baseBlvDir, "config.json");
+        if (!is_file($tryConfigFilePath)) throw new Exception("Try config not exists");
+        $tryConfig = json_decode(file_get_contents($tryConfigFilePath));
+        $obsConfig = Observatory::CreateFromConfig($obs)->getLastConfig();
+        return array("try" => $tryConfig, "obs" => $obsConfig);
+    }
+
     public function SaveInputLocal($baseBlvDir, $input)
     {
         file_put_contents(Path::join($baseBlvDir, "input.dat"), $input);
