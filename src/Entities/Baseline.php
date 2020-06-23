@@ -333,6 +333,17 @@ C
         return array("try" => $tryConfig, "obs" => $obsConfig);
     }
 
+    public static function getTryBLVandRawDataList($obs, $year, $intervalString, $try)
+    {
+        $baseBlvDir = Path::join(DATABANK_PATH, "magstore", $obs, $year, "baseline", $intervalString, $try);
+        if (!is_dir($baseBlvDir)) throw new Exception("Try not exists");
+        $OBSBLVFilePath = Path::join($baseBlvDir, "{$obs}.blv");
+        if (!is_file($OBSBLVFilePath)) throw new Exception("{$obs}.bvl file not exists");
+        $RawDataFilePath = Path::join($baseBlvDir, "data_raw.lst");
+        if (!is_file($RawDataFilePath)) throw new Exception("data_raw.lst file not exists");
+        return [$OBSBLVFilePath, $RawDataFilePath];
+    }
+
     public function SaveInputLocal($baseBlvDir, $input)
     {
         file_put_contents(Path::join($baseBlvDir, "input.dat"), $input);

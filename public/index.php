@@ -190,9 +190,9 @@ route(['GET'], '^/api/baseline/intervals/?$', function ($params) {
 
 route(['GET'], '^/api/baseline/interval-trys/?$', function ($params) {
     if (!isset($_GET["obs"]) || !isset($_GET["year"]) || !isset($_GET["intervalString"])) {
-        header("Content-Type: plain/text");
+        header("Content-Type: application/json");
         header(http_response_code(400));
-        echo "The request is malformed, observatory, year, intervalString is not set";
+        echo json_encode(array("message" => "The request is malformed, observatory, year, intervalString is not set"));
         return;
     }
     $year = intval($_GET["year"]);
@@ -205,9 +205,9 @@ route(['GET'], '^/api/baseline/interval-trys/?$', function ($params) {
 
 route(['GET'], '^/api/baseline/try-config/?$', function ($params) {
     if (!isset($_GET["obs"]) || !isset($_GET["year"]) || !isset($_GET["intervalString"]) || !isset($_GET["try"])) {
-        header("Content-Type: plain/text");
+        header("Content-Type: application/json");
         header(http_response_code(400));
-        echo "The request is malformed, observatory, year, intervalString is not set";
+        echo json_encode(array("message" => "The request is malformed, observatory, year, intervalString, try is not set"));
         return;
     }
     $year = intval($_GET["year"]);
@@ -217,6 +217,36 @@ route(['GET'], '^/api/baseline/try-config/?$', function ($params) {
     header("Content-Type: application/json");
     header(http_response_code(200));
     echo json_encode(Baseline::getTryConfigWithObsConf($obs, $year, $intervalString, $try));
+});
+
+route(['GET'], '^/api/definitive/compute/?$', function ($params) {
+    if (!isset($_GET["obs"]) || !isset($_GET["year"]) || !isset($_GET["intervalString"]) || !isset($_GET["try"])) {
+        header("Content-Type: application/json");
+        header(http_response_code(400));
+        echo json_encode(array("message" => "The request is malformed, observatory, year, intervalString, try is not set"));
+        return;
+    }
+    $year = intval($_GET["year"]);
+    $obs = $_GET["obs"];
+    $intervalString = $_GET["intervalString"];
+    $try = $_GET["try"];
+
+    try {
+        Definitive::compute($obs, $year, $intervalString, $try);
+
+        header("Content-Type: application/json");
+        header(http_response_code(200));
+        echo json_encode(array(
+            "message" => "done"
+        ));
+    } catch (Exception $e) {
+        header("Content-Type: application/json");
+        header(http_response_code(500));
+        echo json_encode(array(
+            "message" => $e->getMessage()
+        ));
+        return;
+    }
 });
 
 route(['GET'], '^/api/files/seconds/?$', function ($params) {

@@ -260,7 +260,7 @@ class Teno
      * @param int $teno
      * @return int
      */
-    private static function getNumberOfLeaps($teno)
+    public static function getNumberOfLeaps($teno)
     {
         foreach (Teno::$LEAP_SECONDS as  $leap) {
             if ($leap["leap"] <= $teno) return $leap["number"];
