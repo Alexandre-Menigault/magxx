@@ -3,7 +3,7 @@
 require_once __DIR__ . '/src/Path.php';
 
 DEFINE("DATABANK_PATH", Path::join("C:", "Users", "user", "Dev", "Databank"));
-DEFINE("OBS_CONFIG_PATH", Path::join(__DIR__, "obs-config/"));
+DEFINE("OBS_CONFIG_PATH", Path::join(DATABANK_PATH, "cfgstore", "Observatories"));
 DEFINE("ABS_BINARY_PATH", Path::join(__DIR__, "bin", "fortran", "abs_data_acq.exe"));
 DEFINE("BSL_BINARY_PATH", Path::join(__DIR__, "bin", "fortran", "cpt_baseline.exe"));
 DEFINE("DEF_BINARY_PATH", Path::join(__DIR__, "bin", "fortran", "cpt_definitive.exe"));
