@@ -25,15 +25,13 @@ class Definitive
         [$startTeno, $endTeno] = Definitive::getTenoIntervalFromIntervalString(intval($year), $intervalString);
         $leapFilePath = LEAPS_FILE_PATH;
 
-        $startBlTeno = $startTeno->teno + Teno::getNumberOfLeaps($startTeno->teno);
-        $endBlTeno = $endTeno->teno + 86400 + Teno::getNumberOfLeaps($endTeno->teno);
-        $startDefTeno = $startTeno->teno + 86400 + Teno::getNumberOfLeaps($startTeno->teno);
-        $endDefTeno = $endTeno->teno - (86400 + Teno::getNumberOfLeaps($endTeno->teno));
-        // $startBlTeno = $startTeno->teno + 5;
-        // $endBlTeno = $endTeno->teno + 86405;
-        // $startDefTeno = $startTeno->teno + 86405;
-        // $endDefTeno = $endTeno->teno - 86405;
-        // Call the definitive fortran program
+        //NOTE: The start of baseline is day - 1 and the end of baseline is day +1
+        //NOTE: To not break the definitive script
+        $startBlTeno = $startTeno->teno - 2 * 86400 + Teno::getNumberOfLeaps($startTeno->teno);
+        $endBlTeno = $endTeno->teno + 2 * 86400 + Teno::getNumberOfLeaps($startTeno->teno);
+        $startDefTeno = $startTeno->teno + Teno::getNumberOfLeaps($startTeno->teno);
+        $endDefTeno = $endTeno->teno + Teno::getNumberOfLeaps($startTeno->teno);
+
         $baseDir = Definitive::getBaseDirOrCreate($obs, $year, $intervalString, $try);
         $tempDir = Path::join($baseDir, 'Temp', "");
         mkdir($tempDir, 0777, true);
@@ -49,7 +47,6 @@ class Definitive
         $noiseF = number_format(floatval($obsConfig->noise_XYZF->F), 5);
 
         $timeStep = $tryConfig->baseline_time_step;
-        // $timeStep = number_format(floatval($tryConfig->baseline_time_step), 5);
 
         $meanX = number_format(floatval($tryConfig->mean_XYZF->X), 5);
         $meanY = number_format(floatval($tryConfig->mean_XYZF->Y), 5);
@@ -88,13 +85,13 @@ class Definitive
 {$endDefTeno}
 ";
 
-        Definitive::SaveInputLocal($baseDir, $input);
         // $this->SaveConfigLocal($baseDir);
         $descriptorspec = array(
             0 => array("pipe", "r"),  // stdin is a pipe that the child will read from
             1 => array("file", Path::join($tempDir, "screen.out"), "a"),  // stdout is a pipe that the child will write to
             2 => array("file", Path::join($tempDir, "screen.err"), "a"),  // stdout is a pipe that the child will write to
         );
+        Definitive::SaveInputLocal($baseDir, $input);
 
         $process = proc_open(DEF_BINARY_PATH, $descriptorspec, $pipes);
         if (is_resource($process)) {

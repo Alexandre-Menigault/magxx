@@ -134,19 +134,22 @@ class Baseline
             return false;
         }
 
+        //NOTE: The start of baseline is day - 1 and the end of baseline is day +1
+        //NOTE: To not break the definitive script
+
+        $startMinusOne = Teno::toUTC($this->startDate->teno - 86400);
+        $endPlusOne = Teno::toUTC($this->endDate->teno + 86400);
+
         $rawDataListPath = Path::join($baseDir, "data_raw.lst");
-        if ($this->imposedValue1_Date->teno < $this->startDate->teno) {
-            File::getRawFilesBetweenDatesInFile($rawDataListPath, $this->observatoryName, $this->imposedValue1_Date, $this->endDate);
-        } else {
-            File::getRawFilesBetweenDatesInFile($rawDataListPath, $this->observatoryName, $this->startDate, $this->endDate);
-        }
+        File::getRawFilesBetweenDatesInFile($rawDataListPath, $this->observatoryName, $startMinusOne, $endPlusOne);
+        // if ($this->imposedValue1_Date->teno < $this->startDate->teno) {
+        //     File::getRawFilesBetweenDatesInFile($rawDataListPath, $this->observatoryName, $this->imposedValue1_Date, $this->endDate);
+        // } else {
+        //     File::getRawFilesBetweenDatesInFile($rawDataListPath, $this->observatoryName, $this->startDate, $this->endDate);
+        // }
 
 
-        // TODO: Handle 1st and 2nd given points: 99999.0 instead
-        // TODO: get raw files list in a file
-        // TODO: Create the directory for this particular baseline in DATABANK/magstore/OBS/YEAR/baseline/<id>
-        // NOTE: The selected one fhould be renamed /baseline/final/
-        // NOTE: Find a good spot for the /Temp directory
+
 
         $startImposedFullYear = Teno::getFullTime($this->imposedValue1_Date->yyyy);
         $startImposedFullMonth = Teno::getFullTime($this->imposedValue1_Date->mmmm);
@@ -155,8 +158,10 @@ class Baseline
         $endImposedFullMonth = Teno::getFullTime($this->imposedValue2_Date->mmmm);
         $endImposedFullDay = Teno::getFullTime($this->imposedValue2_Date->dddd);
 
-        $input = "{$this->startDate->yyyy} {$this->startDate->mmmm} {$this->startDate->dddd}
-{$this->endDate->yyyy} {$this->endDate->mmmm} {$this->endDate->dddd}
+
+
+        $input = "{$startMinusOne->yyyy} {$startMinusOne->mmmm} {$startMinusOne->dddd}
+{$endPlusOne->yyyy} {$endPlusOne->mmmm} {$endPlusOne->dddd}
 {$this->numberOfObservations}
 {$this->searchTimeHalfInterval}
 {$this->angle1}
