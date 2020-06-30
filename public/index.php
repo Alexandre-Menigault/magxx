@@ -249,6 +249,32 @@ route(['GET'], '^/api/definitive/compute/?$', function ($params) {
     }
 });
 
+route(['GET'], '^/api/definitive/trys/?$', function ($params) {
+    if (!isset($_GET["obs"]) || !isset($_GET["year"]) || !isset($_GET["intervalString"])) {
+        header("Content-Type: application/json");
+        header(http_response_code(400));
+        echo json_encode(array("message" => "The request is malformed, observatory, year, intervalString, try is not set"));
+        return;
+    }
+    $year = intval($_GET["year"]);
+    $obs = $_GET["obs"];
+    $intervalString = $_GET["intervalString"];
+
+    header("Content-Type: application/json");
+    header(http_response_code(200));
+    echo json_encode(Definitive::getTrys($obs, $year, $intervalString));
+});
+
+route(['GET'], '^/api/definitive/(?<obs>.+)/(?<year>.+)/(?<intervalString>.+)/(?<try>.+)/(?<startTeno>.+)/?$', function ($params) {
+    header("Content-Type: plain/text");
+    try {
+        header(http_response_code(200));
+        echo Definitive::getFileContentFromIntervalTry($params["obs"], $params["year"], $params["intervalString"], $params["try"], $params["startTeno"]);
+    } catch (Exception $e) {
+        header(http_response_code(500));
+    }
+});
+
 route(['GET'], '^/api/files/seconds/?$', function ($params) {
     $errors = [];
     if (!isset($_GET["start"])) {

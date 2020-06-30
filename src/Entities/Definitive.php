@@ -118,6 +118,17 @@ class Definitive
         return $endpath;
     }
 
+    private static function getResultDir($obs, $year, $intervalString, $try)
+    {
+        return Path::join(DATABANK_PATH, "magstore", $obs, $year, "definitive", $intervalString, $try, "Results");
+    }
+    public static function getTrys($obs, $year, $intervalString)
+    {
+        $baseDir = Path::join(DATABANK_PATH, "magstore", $obs, $year, "definitive", $intervalString);
+        $dirFiles = array_diff(scandir($baseDir, SCANDIR_SORT_DESCENDING), array('.', '..'));
+        return $dirFiles;
+    }
+
     public static function SaveInputLocal($baseBlvDir, $input)
     {
         file_put_contents(Path::join($baseBlvDir, "input.dat"), $input);
@@ -145,5 +156,28 @@ class Definitive
         $end = Teno::fromYYYYDDMMHHMMSS($year, $endMonth, $endDay, 0, 0, 0);
 
         return [$start, $end];
+    }
+
+    /**
+     * Get the file contents of a definitive data for a obs in interval try 
+     *
+     * @param string $obs
+     * @param string $year
+     * @param string $intervalString
+     * @param string $try
+     * @param string $startTeno
+     * @return Generator|string
+     * @throws Exception
+     */
+    public static function getFileContentFromIntervalTry($obs, $year, $intervalString, $try, $startTeno)
+    {
+        $resultsDir = Definitive::getResultDir($obs, $year, $intervalString, $try);
+        $tenDigitsStartTeno = Teno::toUTC($startTeno)->fixedTeno();
+        $filename = "{$obs}-{$tenDigitsStartTeno}-def.csv";
+        $filePath = Path::join($resultsDir, $filename);
+        if (!is_file($filePath))
+            throw new Exception("No file this day {$startTeno}");
+        // Read the content
+        return file_get_contents($filePath);
     }
 }
